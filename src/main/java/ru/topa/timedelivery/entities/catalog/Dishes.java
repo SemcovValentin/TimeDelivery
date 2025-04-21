@@ -50,6 +50,7 @@ public class Dishes {
     @Column(name = "new", nullable = false,columnDefinition = "BIT")
     private boolean isNew;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type_deshes",nullable = false,columnDefinition = "VARCHAR(255)")
     private TypeDishes typeDishes;
 

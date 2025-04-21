@@ -79,8 +79,6 @@
             top: -100px;
         }
 
-
-
         .image-container {
             max-height: 215px;
             max-width: 215px;
@@ -98,7 +96,6 @@
         .card-img-top:hover {
             transform: scale(1.2);
         }
-
 
         .ingredient-text {
             font-size: 0.8em;
@@ -192,7 +189,7 @@
 
 
 <nav class="menu d-flex justify-content-center gap-3 mt-3">
-    <a href="/timeDelivery/catalog/" class="menu-item">РОЛЛЫ</a>
+    <a href="/timeDelivery/catalog/rolls" class="menu-item">РОЛЛЫ</a>
     <a href="/timeDelivery/catalog/wok" class="menu-item">WOK</a>
     <a href="/timeDelivery/catalog/pizza" class="menu-item">ПИЦЦА</a>
     <a href="/timeDelivery/catalog/salad" class="menu-item">САЛАТЫ</a>
@@ -226,24 +223,6 @@
     </div>
 </div>
 
-
-
-
-<div id="carouselExampleIndicators" class="carousel slide mt-3" data-bs-ride="carousel">
-    <div id="carouselIndicators" class="carousel-indicators"></div>
-    <div id="carouselInner" class="carousel-inner"></div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
-            data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
-            data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-    </button>
-</div>
-
 <!--<div class="d-flex justify-content-center mt-3">
     <div class="input-group rounded-pill shadow-sm" style="width: 66.66%;">
         <input class="form-control border-end-0 rounded-pill bg-light-gray" type="search" placeholder="🔍 Поиск"
@@ -265,7 +244,7 @@
         <label class="btn btn-primary" for="btn-check-new">Новинки</label>
     </div>
     <div>
-        <input type="checkbox" class="btn-check" id="btn-check-hit" name="hit" autocomplete="off">
+        <input type="checkbox" class="btn-check" id="btn-check-hit" name="hit" checked autocomplete="off">
         <label class="btn btn-primary" for="btn-check-hit">Хит</label>
     </div>
 </div>
@@ -282,84 +261,46 @@
 </body>
 
 <script>
-    fetch('/images')
-        .then(response => response.json())
-        .then(images => {
-            const carouselInner = document.getElementById('carouselInner');
-            const carouselIndicators = document.getElementById('carouselIndicators');
 
-            // Создание индикаторов
-            images.forEach((image, index) => {
-                const indicator = document.createElement('button');
-                indicator.type = 'button';
-                indicator.dataset.bsTarget = '#carouselExampleIndicators';
-                indicator.dataset.bsSlideTo = index;
-                if (index === 0) {
-                    indicator.classList.add('active');
-                }
-                indicator.ariaLabel = `Slide ${index + 1}`;
-                carouselIndicators.appendChild(indicator);
-            });
-
-            // Создание изображений в карусели
-            images.forEach((image, index) => {
-                const carouselItem = document.createElement('div');
-                carouselItem.classList.add('carousel-item');
-                if (index === 0) {
-                    carouselItem.classList.add('active');
-                }
-
-                const img = document.createElement('img');
-                img.src = `/news/${image}`;
-                img.classList.add('d-block', 'w-100');
-                img.alt = image;
-
-                carouselItem.appendChild(img);
-                carouselInner.appendChild(carouselItem);
-            });
-        })
-        .catch(error => console.error('Error fetching images:', error));
+    //////////////////////////////////////////////
+    //просто выводит все карточки с товарами
+    /* document.addEventListener("DOMContentLoaded", () => {
+         const catalog = document.getElementById("catalog");
 
 
-//////////////////////////////////////////////
-//просто выводит все карточки с товарами
-   /* document.addEventListener("DOMContentLoaded", () => {
-        const catalog = document.getElementById("catalog");
+         fetch("/catalog")
+             .then(response => response.json())
+             .then(data => {
+                 data.forEach(dish => {
+                     // Создание карточки товара
+                     const card = document.createElement("div");
+                     card.innerHTML = `
+     <div class="col">
+         <div class="card" style="width: 100%; max-width: 300px; height: auto;">
+             <div class="image-container">
+                 <img src="${dish.imageUrl}" class="card-img-top img-fluid" alt="${dish.name}"">
+             </div>
 
+             <div class="card-body">
+                 <h5 class="card-title">${dish.name}</h5>
+                 <p class="card-text ingredient-text">${dish.ingredient}</p>
+                 <div class="d-flex justify-content-between align-items-center">
+                     <h5 class="card-title">${dish.price} руб.</h5>
+                     <p class="card-text">${dish.weight} г.</p>
+                 </div>
+                 <a href="#" class="btn btn-warning w-100 mt-3" style="border-radius: 5px;">В корзину 🛒</a>
+             </div>
+         </div>
+     </div>
+ `;
 
-        fetch("/catalog")
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(dish => {
-                    // Создание карточки товара
-                    const card = document.createElement("div");
-                    card.innerHTML = `
-    <div class="col">
-        <div class="card" style="width: 100%; max-width: 300px; height: auto;">
-            <div class="image-container">
-                <img src="${dish.imageUrl}" class="card-img-top img-fluid" alt="${dish.name}"">
-            </div>
-
-            <div class="card-body">
-                <h5 class="card-title">${dish.name}</h5>
-                <p class="card-text ingredient-text">${dish.ingredient}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">${dish.price} руб.</h5>
-                    <p class="card-text">${dish.weight} г.</p>
-                </div>
-                <a href="#" class="btn btn-warning w-100 mt-3" style="border-radius: 5px;">В корзину 🛒</a>
-            </div>
-        </div>
-    </div>
-`;
-
-                    card.className = "col-md-4 mb-4";
-                    catalog.appendChild(card);
-                });
-            })
-            .catch(error => console.error("Ошибка при загрузке данных:", error));
-    });*/
-////////////////////////////////////////////////////////////
+                     card.className = "col-md-4 mb-4";
+                     catalog.appendChild(card);
+                 });
+             })
+             .catch(error => console.error("Ошибка при загрузке данных:", error));
+     });*/
+    ////////////////////////////////////////////////////////////
     //выводит карточки товаров по выборке
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -497,7 +438,7 @@
         lastScrollTop = scrollTop;
     });
 
-//////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
     // кнопка вверх
 
     let scrollToTopBtn = document.getElementById("scrollToTopBtn");
