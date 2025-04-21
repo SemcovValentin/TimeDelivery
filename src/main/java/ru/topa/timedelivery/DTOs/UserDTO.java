@@ -1,0 +1,12 @@
+package ru.topa.timedelivery.DTOs;
+
+
+import lombok.Data;
+
+@Data
+public class UserDTO {
+
+    private String phone;
+    private String password;
+
+}
