@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Delivery - Доставка еды</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+
+        #scrollToTopBtn.show {
+            display: block !important;
+        }
+        #scrollToTopBtn {
+            display: none; /* Hidden by default */
+            position: fixed; /* Fixed position */
+            bottom: 20px; /* Distance from the bottom */
+            right: 20px; /* Distance from the right */
+            z-index: 99; /* Make sure it does not overlap */
+            border: none; /* Remove border */
+            outline: none; /* Remove outline */
+            background-color: transparent; /* Transparent background */
+            cursor: pointer; /* Add a mouse pointer on hover */
+            padding: 0; /* Remove padding */
+            transition: transform 0.3s ease; /* Add transition for smooth effect */
+        }
+
+        #scrollToTopBtn img {
+            width: 40px; /* Размер изображения */
+            height: 40px; /* Размер изображения */
+            border-radius: 50%; /* Rounded corners */
+            transition: transform 0.3s ease; /* Add transition for smooth effect */
+        }
+
+        #scrollToTopBtn:hover img {
+            transform: scale(1.1); /* Increase size on hover */
+        }
+
+        .btn-login-color{
+            background-color: #007bff;
+        }
+        .btn-cart-color{
+            background-color: #ff9900;
+        }
+        .btn-cart {
+            color: white; /* Белый текст */
+            border: none; /* Удаление границы */
+            padding: 8px 12px; /* Внутренний отступ */
+            border-radius: 5px; /* Закругленные углы */
+            transition: background-color 0.3s ease-in-out; /* Эффект наведения */
+        }
+
+        .btn-cart:hover {
+            background-color: #ff6600; /* Темнее при наведении */
+        }
+
+        .bi-cart {
+            margin-right: 5px; /* Отступ после иконки */
+        }
+
+        .scroll-menu {
+            position: fixed;
+            top: -100px; /* Изначально скрыт */
+            width: 100%;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            z-index: 1000;
+            transition: top 0.3s ease-in-out;
+            display: none; /* Изначально скрыт */
+        }
+
+        .scroll-menu.show {
+            top: 0;
+            display: block; /* Показываем при появлении */
+        }
+
+        .scroll-menu.hide {
+            top: -100px;
+        }
+
+        .image-container {
+            max-height: 215px;
+            max-width: 215px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-img-top {
+            max-width: 100%;
+            max-height: 100%;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card-img-top:hover {
+            transform: scale(1.2);
+        }
+
+        .ingredient-text {
+            font-size: 0.8em;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+        }
+        .card {
+            width: 18rem;
+            height: auto;
+        }
+        .card img {
+            height: 200px;
+            object-fit: cover;
+        }
+        .btn-warning {
+            border-radius: 5px;
+        }
+
+        .input-group {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-group input {
+            padding: 10px;
+            background-color: #efebec;
+        }
+
+        .logo {
+            max-height: 70px;
+            width: auto;
+        }
+
+        .menu {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .hed {
+            max-height: 80px;
+        }
+
+        .menu-item {
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 25px;
+            background: linear-gradient(45deg, #ff6f61, #ff9966);
+            color: white;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-item:hover {
+            background: linear-gradient(45deg, #ff9966, #ff6f61);
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-item:active {
+            transform: scale(0.95);
+        }
+
+
+        .orange-text {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+<header class="hed d-flex align-items-center justify-content-between bg-light border-bottom px-4 py-2">
+    <a href="/timeDelivery/">
+        <img class="logo" src="/Logo.png" alt="logotype">
+    </a>
+    <div class="info d-flex flex-column gap-2">
+        <span>Среднее время доставки <span class="orange-text">67 мин.</span></span>
+        <span>Оценка качества <span class="orange-text">4.99</span>⭐</span>
+    </div>
+    <div class="contacts d-flex align-items-center gap-4">
+        <div>📞</div>
+        <div class="d-flex flex-column">
+            <span>+7 (978) 999-99-99</span>
+            <span>+7 (978) 555-55-55</span>
+        </div>
+        <div><a href="#" class="btn btn-cart btn-login-color btn-sm"><i class="bi bi-person"></i>ВОЙТИ</a></div>
+        <div><a href="#" class="btn btn-cart btn-cart-color btn-sm"><i class="bi bi-cart"></i>КОРЗИНА</a></div>
+    </div>
+</header>
+
+
+<nav class="menu d-flex justify-content-center gap-3 mt-3">
+    <a href="/timeDelivery/catalog/rolls" class="menu-item">РОЛЛЫ</a>
+    <a href="/timeDelivery/catalog/wok" class="menu-item">WOK</a>
+    <a href="/timeDelivery/catalog/pizza" class="menu-item">ПИЦЦА</a>
+    <a href="/timeDelivery/catalog/salad" class="menu-item">САЛАТЫ</a>
+    <a href="/timeDelivery/catalog/burgers" class="menu-item">БУРГЕРЫ</a>
+    <a href="#" class="menu-item">ЕЩЕ ИНФОРМАЦИЯ</a>
+</nav>
+
+<div class="scroll-menu bg-light border-bottom fixed-top" style="display: none;">
+    <div class="container">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-auto">
+                <a class="navbar-brand" href="#">
+                    <img class="logo" src="/Logo.png" alt="logotype">
+                </a>
+            </div>
+            <div class="col-auto">
+                <nav class="nav menu justify-content-center">
+                    <a href="/timeDelivery/catalog/rolls" class="menu-item">РОЛЛЫ</a>
+                    <a href="/timeDelivery/catalog/wok" class="menu-item">WOK</a>
+                    <a href="/timeDelivery/catalog/pizza" class="menu-item">ПИЦЦА</a>
+                    <a href="/timeDelivery/catalog/salad" class="menu-item">САЛАТЫ</a>
+                    <a href="/timeDelivery/catalog/burgers" class="menu-item">БУРГЕРЫ</a>
+                    <a href="#" class="nav-link menu-item px-2">ЕЩЕ ИНФОРМАЦИЯ</a>
+                </nav>
+            </div>
+            <div class="col-auto d-flex align-items-center">
+                <span class="me-2 text-secondary">📞 +7 (978) 999-99-99</span>
+                <div><a href="#" class="btn btn-cart btn-cart-color btn-sm"><i class="bi bi-cart"></i>КОРЗИНА</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center mt-3">
+    <div class="input-group rounded-pill shadow-sm" style="width: 66.66%;">
+        <input id="searchInput" class="form-control border-end-0 rounded-pill bg-light-gray" type="search" placeholder="🔍 Поиск"
+               aria-label="Search">
+    </div>
+</div>
+
+<div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
+    <div>
+        <input type="checkbox" class="btn-check" id="btn-check-veg" name="veg" checked autocomplete="off">
+        <label class="btn btn-primary" for="btn-check-veg">Вегетарианское</label>
+    </div>
+    <div>
+        <input type="checkbox" class="btn-check" id="btn-check-spicy" name="spicy" checked autocomplete="off">
+        <label class="btn btn-primary" for="btn-check-spicy">Острое</label>
+    </div>
+    <div>
+        <input type="checkbox" class="btn-check" id="btn-check-new" name="new" checked autocomplete="off">
+        <label class="btn btn-primary" for="btn-check-new">Новинки</label>
+    </div>
+    <div>
+        <input type="checkbox" class="btn-check" id="btn-check-hit" name="hit" checked autocomplete="off">
+        <label class="btn btn-primary" for="btn-check-hit">Хит</label>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 filtr-catalog" id="catalog"></div>
+</div>
+
+<button id="scrollToTopBtn">
+    <img src="/UP.png" alt="Scroll to top" />
+</button>
+
+
+</body>
+
+<script>
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param) || '';
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const searchInput = document.getElementById("searchInput");
+        const initialQuery = getQueryParam('query');
+
+        if (initialQuery) {
+            searchInput.value = initialQuery;
+        }
+
+    });
+
+
+    //выводит карточки товаров по выборке
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const catalog = document.getElementById("catalog");
+        const searchInput = document.getElementById("searchInput");
+
+        let allDishes = [];
+
+        // Универсальная функция debounce
+        function debounce(fn, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    fn.apply(this, args);
+                }, delay);
+            };
+        }
+
+        function renderCards(dishes) {
+            catalog.innerHTML = "";
+            if (dishes.length === 0) {
+                catalog.innerHTML = "<p>Нет блюд для отображения</p>";
+                return;
+            }
+            dishes.forEach(dish => {
+                const card = document.createElement("div");
+                card.className = "col-md-4 mb-4";
+                card.innerHTML = `
+            <div class="card" style="width: 100%; max-width: 300px; height: auto;">
+                <div class="image-container">
+                    <img src="${dish.imageUrl}" class="card-img-top img-fluid" alt="${dish.name}">
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">${dish.name}</h5>
+                    <p class="card-text ingredient-text">${dish.ingredient}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">${dish.price} руб.</h5>
+                        <p class="card-text">${dish.weight} г.</p>
+                    </div>
+                    <a href="#" class="btn btn-warning w-100 mt-3" style="border-radius: 5px;">В корзину 🛒</a>
+                </div>
+            </div>
+            `;
+                catalog.appendChild(card);
+            });
+        }
+
+        function filterDishes() {
+            const isVeganChecked = !document.getElementById("btn-check-veg").checked;
+            const isSpicyChecked = !document.getElementById("btn-check-spicy").checked;
+            const isNewChecked = !document.getElementById("btn-check-new").checked;
+            const isTopChecked = !document.getElementById("btn-check-hit").checked;
+            const searchQuery = searchInput.value.trim().toLowerCase();
+
+            const filtered = allDishes.filter(dish => {
+                if (isVeganChecked && !dish.vegan) return false;
+                if (isSpicyChecked && !dish.spicy) return false;
+                if (isNewChecked && !dish.new) return false;
+                if (isTopChecked && !dish.top) return false;
+                if (searchQuery && !dish.name.toLowerCase().includes(searchQuery)) return false;
+                return true;
+            });
+
+            renderCards(filtered);
+        }
+
+        fetch("/catalog")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                allDishes = data;
+                filterDishes();
+            })
+            .catch(error => console.error("Ошибка при загрузке данных:", error));
+
+        ["btn-check-veg", "btn-check-spicy", "btn-check-new", "btn-check-hit"].forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) {
+                checkbox.addEventListener("change", filterDishes);
+            } else {
+                console.error(`Элемент с id ${id} не найден!`);
+            }
+        });
+
+        if (searchInput) {
+            // Используем дебаунсинг для поиска с задержкой 300ms
+            const debouncedFilter = debounce(filterDishes, 300);
+            searchInput.addEventListener("input", debouncedFilter);
+        } else {
+            console.error("Поле поиска не найдено!");
+        }
+    });
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //менюшка, которая следует за экраном
+    let lastScrollTop = 0;
+
+    window.addEventListener("scroll", () => {
+        let scrollTop = window.scrollY;
+        let scrollMenu = document.querySelector(".scroll-menu");
+
+        if (scrollTop > lastScrollTop) {
+            // Прокрутка вниз
+            if (scrollTop > 150) { // Появляется после прокрутки на 200 пикселей
+                scrollMenu.style.display = "block"; // Показываем элемент
+                scrollMenu.classList.remove("hide");
+                scrollMenu.classList.add("show");
+            }
+        } else {
+            // Прокрутка вверх
+            if (scrollTop < 150) { // Исчезает при прокрутке до 100 пикселей от верха
+                scrollMenu.classList.remove("show");
+                scrollMenu.classList.add("hide");
+                scrollMenu.style.display = "none"; // Скрываем элемент
+            }
+        }
+
+        lastScrollTop = scrollTop;
+    });
+
+    //////////////////////////////////////////////////////////////////
+    // кнопка вверх
+
+    let scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+    // Когда пользователь прокручивает документ на 20 пикселей вниз от его верхней части, покажите кнопку
+    window.onscroll = function() {scrollFunction()};
+
+    function scrollFunction() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            scrollToTopBtn.classList.add("show");
+        } else {
+            scrollToTopBtn.classList.remove("show");
+        }
+    }
+    // Когда пользователь нажимает кнопку, прокручивается до начала документа.
+    scrollToTopBtn.addEventListener("click", function(){
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    });
+</script>
+
+</html>

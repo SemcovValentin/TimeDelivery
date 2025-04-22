@@ -27,6 +27,11 @@ public class HomeController {
         return "home";
     }
 
+    @GetMapping("/search")
+    public String search(Model model) {
+        return "search";
+    }
+
     @GetMapping("/images")
     @ResponseBody
     public List<String> getImages() {
