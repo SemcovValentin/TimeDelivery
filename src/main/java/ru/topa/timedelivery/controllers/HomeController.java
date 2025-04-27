@@ -44,4 +44,14 @@ public class HomeController {
         return dishesRepository.findAll();
     }
 
+    @GetMapping("/timeDelivery/catalog/")
+    public String catalog() {
+        return "catalog";
+    }
+    
+    @GetMapping("/restaurants")
+    public String restaurants(){
+        return "restaurants";
+    }
+
 }
