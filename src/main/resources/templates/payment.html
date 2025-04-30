@@ -12,18 +12,6 @@
             overflow-x: hidden;
         }
 
-        .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            will-change: transform;
-        }
-
-        .card:hover {
-            transform: scale(1.05); /* Увеличение на 5% */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Тень */
-            z-index: 10; /* Чтобы карточка была поверх соседних */
-        }
-
         #scrollToTopBtn.show {
             display: block !important;
         }
@@ -95,33 +83,6 @@
             top: -100px;
         }
 
-        .card-img-top {
-            max-width: 100%;
-            max-height: 100%;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .card-img-top:hover {
-            transform: scale(1.2);
-        }
-
-        .ingredient-text {
-            font-size: 0.8em;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-        }
-        .card {
-            width: 18rem;
-            height: auto;
-        }
-        .card img {
-            height: 200px;
-            object-fit: cover;
-        }
-        .btn-warning {
-            border-radius: 5px;
-        }
-
         .input-group {
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
@@ -168,14 +129,15 @@
         .menu-item:active {
             transform: scale(0.95);
         }
-
         .orange-text {
             color: orange;
         }
+
         h5{
             color: white;
             font-family: "Times New Roman", Times, serif;
         }
+
 
         .footer-bg {
             background-color: #222;
@@ -207,13 +169,16 @@
         .footer-text:hover {
             color: #ff9900;
         }
+
         .text{
             font-family: "Times New Roman", Times, serif;
         }
 
     </style>
 </head>
+
 <body>
+
 <header class="hed d-flex align-items-center justify-content-between bg-light border-bottom px-4 py-2">
     <a href="/timeDelivery/">
         <img class="logo" src="/Logo.png" alt="logotype">
@@ -234,18 +199,17 @@
 </header>
 
 
-<nav class="menu d-flex justify-content-center gap-3 mt-3">
+<nav class="menu d-flex justify-content-center gap-3 mt-3 ">
     <a href="/timeDelivery/catalog/?category=rolls" class="menu-item">РОЛЛЫ</a>
     <a href="/timeDelivery/catalog/?category=wok" class="menu-item">WOK</a>
     <a href="/timeDelivery/catalog/?category=pizza" class="menu-item">ПИЦЦА</a>
     <a href="/timeDelivery/catalog/?category=salad" class="menu-item">САЛАТЫ</a>
     <a href="/timeDelivery/catalog/?category=burger" class="menu-item">БУРГЕРЫ</a>
-
     <a href="#" class="menu-item">ЕЩЕ ИНФОРМАЦИЯ</a>
 </nav>
 
 <div class="scroll-menu bg-light border-bottom fixed-top" style="display: none;">
-    <div class="container">
+    <div class="container-fluid">
         <div class="row align-items-center justify-content-between">
             <div class="col-auto">
                 <a class="navbar-brand" href="/timeDelivery/">
@@ -270,6 +234,10 @@
     </div>
 </div>
 
+<button id="scrollToTopBtn">
+    <img src="/UP.png" alt="Scroll to top" />
+</button>
+
 <div class="d-flex justify-content-center mt-3">
     <div class="input-group rounded-pill shadow-sm" style="width: 66.66%;">
         <input id="searchInput" class="form-control border-end-0 rounded-pill bg-light-gray text" type="search" placeholder="🔍 Поиск"
@@ -277,33 +245,19 @@
     </div>
 </div>
 
-<div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
-    <div>
-        <input type="checkbox" class="btn-check" id="btn-check-veg" name="veg" checked autocomplete="off">
-        <label class="btn btn-primary" for="btn-check-veg">Вегетарианское</label>
-    </div>
-    <div>
-        <input type="checkbox" class="btn-check" id="btn-check-spicy" name="spicy" checked autocomplete="off">
-        <label class="btn btn-primary" for="btn-check-spicy">Острое</label>
-    </div>
-    <div>
-        <input type="checkbox" class="btn-check" id="btn-check-new" name="new" checked autocomplete="off">
-        <label class="btn btn-primary" for="btn-check-new">Новинки</label>
-    </div>
-    <div>
-        <input type="checkbox" class="btn-check" id="btn-check-hit" name="hit" checked autocomplete="off">
-        <label class="btn btn-primary" for="btn-check-hit">Хит</label>
-    </div>
+<div class="container px-5" style="height: 700px">
+    <h1 class="text my-3">Способы оплаты в Мияги</h1>
+    <span class="text">Забота о наших клиентах - главная составляющая концепции Мияги. Поэтому мы стараемся угодить вам не только вкусными блюдами и шикарными акциями, но удобством оплаты наших услуг. В ресторанах "Мияги Town" и "Мияги Hall", а также при заказе доставки еды на дом либо в офис, наши курьеры и официанты принимают любые виды оплаты:</span><br>
+
+    <ul class="my-3">
+        <li class="text">расчет наличными средствами;</li>
+        <li class="text">оплата картой курьеру;</li>
+        <li class="text">оплата онлайн на сайте (находится в стадии разработки)</li>
+    </ul>
+
+    <span class="text">При посещении ресторанов "Мияги Town" и "Мияги Hall", предъявители бонусных карт имеют право расплатиться баллами, собранными при предыдущих посещениях, если их сумма будет меньше половины стоимости чека. Для доставки на дом имеется отдельная система накопительных баллов.</span><br>
+    <span class="text">Мы любим и заботимся о наших клиентах, поэтому предлагаем им самые удобные и выгодные условия для комфортного посещения наших заведений или заказа доставки на дом.</span>
 </div>
-
-<div class="container mt-4">
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 filtr-catalog" id="catalog"></div>
-</div>
-
-<button id="scrollToTopBtn">
-    <img src="/UP.png" alt="Scroll to top" />
-</button>
-
 
 </body>
 
@@ -328,7 +282,7 @@
                 <div class="d-flex flex-column footer-boxes h-100">
                     <h5>ДОСТАВКА И ОПЛАТА</h5>
                     <a href="/delivery" class="footer-text">Доставка</a>
-                    <a href="/payment" class="footer-text">Оплата</a>
+                    <a href="#" class="footer-text">Оплата</a>
                     <a href="/pickup" class="footer-text">Самовывоз</a>
                 </div>
             </div>
@@ -361,111 +315,6 @@
                 window.location.href = `/search?query=${query}`;
             }
         }
-    });
-
-    //////////////////////////////////////////////
-
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const catalog = document.getElementById("catalog");
-        let allDishes = [];
-        let currentCategory = null;
-
-        // Функция для отрисовки карточек блюд на странице
-        function renderCards(dishes) {
-            catalog.innerHTML = "";
-
-            if (dishes.length === 0) {
-                catalog.innerHTML = "<p>Нет блюд для отображения</p>";
-                return;
-            }
-
-            dishes.forEach(dish => {
-                const card = document.createElement("div");
-                card.className = "col-md-4 mb-4";
-                card.innerHTML = `
-  <div class="card h-100 d-flex flex-column">
-    <div class="d-flex justify-content-center mb-3">
-      <img src="${dish.imageUrl}" class="card-img-top img-fluid" alt="${dish.name}" style="max-height: 200px; object-fit: contain;">
-    </div>
-    <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
-      <h5 class="card-title">${dish.name}</h5>
-      <p class="card-text ingredient-text">${dish.ingredient}</p>
-      <div class="d-flex justify-content-between align-items-center mt-auto">
-        <h5 class="card-title">${dish.price} руб.</h5>
-        <p class="card-text">${dish.weight} г.</p>
-      </div>
-      <a href="#" class="btn btn-warning w-100 mt-3" style="border-radius: 5px;">В корзину 🛒</a>
-    </div>
-  </div>
-`;
-
-
-                catalog.appendChild(card);
-            });
-        }
-
-        // Функция фильтрации блюд по категории и чекбоксам
-        function filterDishes() {
-            // Получаем состояние чекбоксов (инвертировано)
-            const isVeganChecked = !document.getElementById("btn-check-veg").checked;
-            const isSpicyChecked = !document.getElementById("btn-check-spicy").checked;
-            const isNewChecked = !document.getElementById("btn-check-new").checked;
-            const isTopChecked = !document.getElementById("btn-check-hit").checked;
-
-            // Сначала фильтруем по категории, если указана
-            let filtered = allDishes;
-            if (currentCategory) {
-                filtered = filtered.filter(
-                    dish => dish.typeDishes && dish.typeDishes.toLowerCase() === currentCategory
-                );
-            }
-
-            // Затем фильтруем по чекбоксам
-            filtered = filtered.filter(dish => {
-                if (isVeganChecked && !dish.vegan) return false;
-                if (isSpicyChecked && !dish.spicy) return false;
-                if (isNewChecked && !dish.new) return false;
-                if (isTopChecked && !dish.top) return false;
-                return true;
-            });
-
-            renderCards(filtered);
-        }
-
-        // Получаем данные с сервера по адресу /catalog
-        fetch("/catalog")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Ошибка HTTP: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                allDishes = data;
-
-                // Получаем категорию из URL (в нижнем регистре для удобства)
-                currentCategory = getQueryParam('category');
-                if (currentCategory) currentCategory = currentCategory.toLowerCase();
-
-                // Отрисовываем блюда с учётом фильтров
-                filterDishes();
-            })
-            .catch(error => console.error("Ошибка при загрузке данных:", error));
-
-        // Навешиваем обработчики события change на все чекбоксы
-        ["btn-check-veg", "btn-check-spicy", "btn-check-new", "btn-check-hit"].forEach(id => {
-            const checkbox = document.getElementById(id);
-            if (checkbox) {
-                checkbox.addEventListener("change", filterDishes);
-            } else {
-                console.error(`Элемент с id ${id} не найден!`);
-            }
-        });
     });
 
     ///////////////////////////////////////////////////////////////////////////////////

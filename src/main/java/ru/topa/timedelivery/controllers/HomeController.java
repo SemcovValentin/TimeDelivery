@@ -54,4 +54,23 @@ public class HomeController {
         return "restaurants";
     }
 
+    @GetMapping("/bonuses")
+    public String bonuses(){
+        return "bonuses";
+    }
+
+    @GetMapping("/payment")
+    public String payment(){
+        return "payment";
+    }
+
+    @GetMapping("/pickup")
+    public String pickup(){
+        return "pickup";
+    }
+
+    @GetMapping("/delivery")
+    public String delivery(){
+        return "delivery";
+    }
 }
