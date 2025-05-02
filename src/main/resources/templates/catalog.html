@@ -235,13 +235,11 @@
 
 
 <nav class="menu d-flex justify-content-center gap-3 mt-3">
-    <a href="/timeDelivery/catalog/?category=rolls" class="menu-item">РОЛЛЫ</a>
-    <a href="/timeDelivery/catalog/?category=wok" class="menu-item">WOK</a>
-    <a href="/timeDelivery/catalog/?category=pizza" class="menu-item">ПИЦЦА</a>
-    <a href="/timeDelivery/catalog/?category=salad" class="menu-item">САЛАТЫ</a>
-    <a href="/timeDelivery/catalog/?category=burger" class="menu-item">БУРГЕРЫ</a>
-
-    <a href="#" class="menu-item">ЕЩЕ ИНФОРМАЦИЯ</a>
+    <th:block th:each="category : ${categories}">
+        <a th:href="@{'/timeDelivery/catalog/?category=' + ${category.name}}"
+           class="menu-item"
+           th:text="${category.name.toUpperCase()}"></a>
+    </th:block>
 </nav>
 
 <div class="scroll-menu bg-light border-bottom fixed-top" style="display: none;">
@@ -253,13 +251,12 @@
                 </a>
             </div>
             <div class="col-auto">
-                <nav class="nav menu justify-content-center">
-                    <a href="/timeDelivery/catalog/?category=rolls" class="menu-item">РОЛЛЫ</a>
-                    <a href="/timeDelivery/catalog/?category=wok" class="menu-item">WOK</a>
-                    <a href="/timeDelivery/catalog/?category=pizza" class="menu-item">ПИЦЦА</a>
-                    <a href="/timeDelivery/catalog/?category=salad" class="menu-item">САЛАТЫ</a>
-                    <a href="/timeDelivery/catalog/?category=burger" class="menu-item">БУРГЕРЫ</a>
-                    <a href="#" class="nav-link menu-item px-2">ЕЩЕ ИНФОРМАЦИЯ</a>
+                <nav class="menu d-flex justify-content-center gap-3 mt-3">
+                    <th:block th:each="category : ${categories}">
+                        <a th:href="@{'/timeDelivery/catalog/?category=' + ${category.name}}"
+                           class="menu-item"
+                           th:text="${category.name.toUpperCase()}"></a>
+                    </th:block>
                 </nav>
             </div>
             <div class="col-auto d-flex align-items-center">
@@ -420,13 +417,19 @@
             // Сначала фильтруем по категории, если указана
             let filtered = allDishes;
             if (currentCategory) {
-                filtered = filtered.filter(
-                    dish => dish.typeDishes && dish.typeDishes.toLowerCase() === currentCategory
-                );
+                filtered = filtered.filter((dish) => {
+                    if (!dish.typeDishes || dish.typeDishes.length === 0) {
+                        return false; // Если у блюда нет категорий, то не подходит
+                    }
+                    // Проверяем, содержит ли блюдо категорию с нужным именем
+                    return dish.typeDishes.some(
+                        (category) => category.name.toLowerCase() === currentCategory
+                    );
+                });
             }
 
             // Затем фильтруем по чекбоксам
-            filtered = filtered.filter(dish => {
+            filtered = filtered.filter((dish) => {
                 if (isVeganChecked && !dish.vegan) return false;
                 if (isSpicyChecked && !dish.spicy) return false;
                 if (isNewChecked && !dish.new) return false;
@@ -439,82 +442,87 @@
 
         // Получаем данные с сервера по адресу /catalog
         fetch("/catalog")
-            .then(response => {
+            .then((response) => {
                 if (!response.ok) {
                     throw new Error(`Ошибка HTTP: ${response.status}`);
                 }
                 return response.json();
             })
-            .then(data => {
+            .then((data) => {
                 allDishes = data;
 
                 // Получаем категорию из URL (в нижнем регистре для удобства)
-                currentCategory = getQueryParam('category');
+                currentCategory = getQueryParam("category");
                 if (currentCategory) currentCategory = currentCategory.toLowerCase();
 
                 // Отрисовываем блюда с учётом фильтров
                 filterDishes();
             })
-            .catch(error => console.error("Ошибка при загрузке данных:", error));
+            .catch((error) => console.error("Ошибка при загрузке данных:", error));
 
         // Навешиваем обработчики события change на все чекбоксы
-        ["btn-check-veg", "btn-check-spicy", "btn-check-new", "btn-check-hit"].forEach(id => {
-            const checkbox = document.getElementById(id);
-            if (checkbox) {
-                checkbox.addEventListener("change", filterDishes);
+        ["btn-check-veg", "btn-check-spicy", "btn-check-new", "btn-check-hit"].forEach(
+            (id) => {
+                const checkbox = document.getElementById(id);
+                if (checkbox) {
+                    checkbox.addEventListener("change", filterDishes);
+                } else {
+                    console.error(`Элемент с id ${id} не найден!`);
+                }
+            });
+    })
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        //менюшка, которая следует за экраном
+        let lastScrollTop = 0;
+
+        window.addEventListener("scroll", () => {
+            let scrollTop = window.scrollY;
+            let scrollMenu = document.querySelector(".scroll-menu");
+
+            if (scrollTop > lastScrollTop) {
+                // Прокрутка вниз
+                if (scrollTop > 150) { // Появляется после прокрутки на 200 пикселей
+                    scrollMenu.style.display = "block"; // Показываем элемент
+                    scrollMenu.classList.remove("hide");
+                    scrollMenu.classList.add("show");
+                }
             } else {
-                console.error(`Элемент с id ${id} не найден!`);
+                // Прокрутка вверх
+                if (scrollTop < 150) { // Исчезает при прокрутке до 100 пикселей от верха
+                    scrollMenu.classList.remove("show");
+                    scrollMenu.classList.add("hide");
+                    scrollMenu.style.display = "none"; // Скрываем элемент
+                }
             }
+
+            lastScrollTop = scrollTop;
         });
-    });
 
-    ///////////////////////////////////////////////////////////////////////////////////
-    //менюшка, которая следует за экраном
-    let lastScrollTop = 0;
+        //////////////////////////////////////////////////////////////////
+        // кнопка вверх
 
-    window.addEventListener("scroll", () => {
-        let scrollTop = window.scrollY;
-        let scrollMenu = document.querySelector(".scroll-menu");
+        let scrollToTopBtn = document.getElementById("scrollToTopBtn");
 
-        if (scrollTop > lastScrollTop) {
-            // Прокрутка вниз
-            if (scrollTop > 150) { // Появляется после прокрутки на 200 пикселей
-                scrollMenu.style.display = "block"; // Показываем элемент
-                scrollMenu.classList.remove("hide");
-                scrollMenu.classList.add("show");
-            }
-        } else {
-            // Прокрутка вверх
-            if (scrollTop < 150) { // Исчезает при прокрутке до 100 пикселей от верха
-                scrollMenu.classList.remove("show");
-                scrollMenu.classList.add("hide");
-                scrollMenu.style.display = "none"; // Скрываем элемент
+        // Когда пользователь прокручивает документ на 20 пикселей вниз от его верхней части, покажите кнопку
+        window.onscroll = function () {
+            scrollFunction()
+        };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollToTopBtn.classList.add("show");
+            } else {
+                scrollToTopBtn.classList.remove("show");
             }
         }
 
-        lastScrollTop = scrollTop;
-    });
+        // Когда пользователь нажимает кнопку, прокручивается до начала документа.
+        scrollToTopBtn.addEventListener("click", function () {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        });
 
-    //////////////////////////////////////////////////////////////////
-    // кнопка вверх
-
-    let scrollToTopBtn = document.getElementById("scrollToTopBtn");
-
-    // Когда пользователь прокручивает документ на 20 пикселей вниз от его верхней части, покажите кнопку
-    window.onscroll = function() {scrollFunction()};
-
-    function scrollFunction() {
-        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-            scrollToTopBtn.classList.add("show");
-        } else {
-            scrollToTopBtn.classList.remove("show");
-        }
-    }
-    // Когда пользователь нажимает кнопку, прокручивается до начала документа.
-    scrollToTopBtn.addEventListener("click", function(){
-        document.body.scrollTop = 0; // For Safari
-        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-    });
 </script>
 
 </html>

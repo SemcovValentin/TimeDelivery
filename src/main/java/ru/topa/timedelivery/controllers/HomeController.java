@@ -8,12 +8,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import ru.topa.timedelivery.entities.catalog.Dishes;
 import ru.topa.timedelivery.repositories.DishesRepository;
 import ru.topa.timedelivery.services.HomeService;
+import ru.topa.timedelivery.services.TypeDishesService;
 
 import java.util.List;
 
 
 @Controller
 public class HomeController {
+    @Autowired
+    TypeDishesService typeDishesService;
     @Autowired
     HomeService homeService;
 
@@ -24,11 +27,13 @@ public class HomeController {
     @GetMapping("/timeDelivery/")
     public String home(Model model) {
         model.addAttribute("images", homeService.getCarousel());
+        model.addAttribute("categories", typeDishesService.getAllCategories());
         return "home";
     }
 
     @GetMapping("/search")
     public String search(Model model) {
+        model.addAttribute("categories", typeDishesService.getAllCategories());
         return "search";
     }
 
@@ -45,32 +50,38 @@ public class HomeController {
     }
 
     @GetMapping("/timeDelivery/catalog/")
-    public String catalog() {
+    public String catalog(Model model) {
+        model.addAttribute("categories", typeDishesService.getAllCategories());
         return "catalog";
     }
     
     @GetMapping("/restaurants")
-    public String restaurants(){
+    public String restaurants(Model model) {
+        model.addAttribute("categories", typeDishesService.getAllCategories());
         return "restaurants";
     }
 
     @GetMapping("/bonuses")
-    public String bonuses(){
+    public String bonuses(Model model) {
+        model.addAttribute("categories", typeDishesService.getAllCategories());
         return "bonuses";
     }
 
     @GetMapping("/payment")
-    public String payment(){
+    public String payment(Model model) {
+        model.addAttribute("categories", typeDishesService.getAllCategories());
         return "payment";
     }
 
     @GetMapping("/pickup")
-    public String pickup(){
+    public String pickup(Model model) {
+        model.addAttribute("categories", typeDishesService.getAllCategories());
         return "pickup";
     }
 
     @GetMapping("/delivery")
-    public String delivery(){
+    public String delivery(Model model) {
+        model.addAttribute("categories", typeDishesService.getAllCategories());
         return "delivery";
     }
 }

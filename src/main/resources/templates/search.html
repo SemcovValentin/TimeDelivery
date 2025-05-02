@@ -234,12 +234,11 @@
 
 
 <nav class="menu d-flex justify-content-center gap-3 mt-3">
-    <a href="/timeDelivery/catalog/?category=rolls" class="menu-item">РОЛЛЫ</a>
-    <a href="/timeDelivery/catalog/?category=wok" class="menu-item">WOK</a>
-    <a href="/timeDelivery/catalog/?category=pizza" class="menu-item">ПИЦЦА</a>
-    <a href="/timeDelivery/catalog/?category=salad" class="menu-item">САЛАТЫ</a>
-    <a href="/timeDelivery/catalog/?category=burger" class="menu-item">БУРГЕРЫ</a>
-    <a href="#" class="menu-item">ЕЩЕ ИНФОРМАЦИЯ</a>
+    <th:block th:each="category : ${categories}">
+        <a th:href="@{'/timeDelivery/catalog/?category=' + ${category.name}}"
+           class="menu-item"
+           th:text="${category.name.toUpperCase()}"></a>
+    </th:block>
 </nav>
 
 <div class="scroll-menu bg-light border-bottom fixed-top" style="display: none;">
@@ -251,13 +250,12 @@
                 </a>
             </div>
             <div class="col-auto">
-                <nav class="nav menu justify-content-center">
-                    <a href="/timeDelivery/catalog/?category=rolls" class="menu-item">РОЛЛЫ</a>
-                    <a href="/timeDelivery/catalog/?category=wok" class="menu-item">WOK</a>
-                    <a href="/timeDelivery/catalog/?category=pizza" class="menu-item">ПИЦЦА</a>
-                    <a href="/timeDelivery/catalog/?category=salad" class="menu-item">САЛАТЫ</a>
-                    <a href="/timeDelivery/catalog/?category=burger" class="menu-item">БУРГЕРЫ</a>
-                    <a href="#" class="nav-link menu-item px-2">ЕЩЕ ИНФОРМАЦИЯ</a>
+                <nav class="menu d-flex justify-content-center gap-3 mt-3">
+                    <th:block th:each="category : ${categories}">
+                        <a th:href="@{'/timeDelivery/catalog/?category=' + ${category.name}}"
+                           class="menu-item"
+                           th:text="${category.name.toUpperCase()}"></a>
+                    </th:block>
                 </nav>
             </div>
             <div class="col-auto d-flex align-items-center">
