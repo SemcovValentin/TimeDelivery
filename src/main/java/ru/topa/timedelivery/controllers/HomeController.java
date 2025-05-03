@@ -23,6 +23,11 @@ public class HomeController {
     @Autowired
     DishesRepository dishesRepository;
 
+    @GetMapping("/test")
+    public String test(){
+        return "test";
+    }
+
 
     @GetMapping("/timeDelivery/")
     public String home(Model model) {
