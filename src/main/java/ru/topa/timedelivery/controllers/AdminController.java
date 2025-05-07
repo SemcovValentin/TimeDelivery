@@ -12,7 +12,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/timeDelivery/admin")
+@RequestMapping("/admin")
 public class AdminController {
     @Autowired
     DishesService dishesService;

@@ -23,11 +23,11 @@ public class RestUtils {
 
         User user = new User();
         user.setPassword(userDTO.getPassword());
-        user.setPhone(userDTO.getPhone());
+        user.setName(userDTO.getName());
         userRepository.save(user);
 
         Client client = new Client();
-        client.setPhone(userDTO.getPhone());
+        client.setPhone(userDTO.getName());
         client.setUser(user);
         clientRepository.save(client);
     }

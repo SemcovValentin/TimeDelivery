@@ -17,23 +17,16 @@ public class Client {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    /*@NotBlank(message = "Name not be empty!")*/
     @Column(columnDefinition = "NVARCHAR(255)")
     private String name;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
-    private String surname;
-
-    /*@NotBlank*/
     @Email(message = "Incorrect email address")
     @Column(unique = true)
     private String email;
 
-   /* @NotBlank (message = "Address name not be empty")*/
     @Column(columnDefinition = "NVARCHAR(255)")
     private String address;
 
-    /*@NotBlank (message = "Сity name not be empty!")*/
     @Column(columnDefinition = "NVARCHAR(255)")
     private String city;
 

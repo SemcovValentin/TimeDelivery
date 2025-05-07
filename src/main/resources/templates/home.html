@@ -197,7 +197,7 @@
             color: white;
             font-family: "Times New Roman", Times, serif;
         }
-
+        /*поиск*/
         #searchInput {
             background-color: #fff !important;
             color: #212529 !important;
@@ -209,8 +209,7 @@
         }
 
 
-
-
+        /*footer*/
         .footer-bg {
             background-color: #222;
             width: 100%;
@@ -245,7 +244,7 @@
             font-family: "Times New Roman", Times, serif;
         }
 
-        /* Общие стили для форм */
+        /* форма входа и регистрации */
         .offcanvas {
             background-color: #222;
             color: #888;
@@ -368,7 +367,7 @@
             <span>+7 (978) 999-99-99</span>
             <span>+7 (978) 555-55-55</span>
         </div>
-        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+        <button id="loginPopoverBtn" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
             Вход
         </button>
         <div><a href="#" class="btn btn-cart btn-cart-color btn-sm"><i class="bi bi-cart"></i>КОРЗИНА</a></div>
@@ -751,12 +750,67 @@
             switchForm('login');
         });
 
-        // Валидация формы входа
+        /*// Валидация формы входа
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             showUniversalToast('Успешный вход', 'Вы успешно вошли в систему!', 'success');
-        });
+        });*/
     });
+
+    //отправка на backend при регистрации
+    function cleanPhone(phone) {
+        return phone.replace(/[^+0-9]/g, '');
+    }
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const phone = document.getElementById('registerPhone').value;
+        const cleanPhoneValue = cleanPhone(phone);
+        const data = {
+            name: document.getElementById('registerName').value,
+            email: document.getElementById('registerEmail').value,
+            phone: cleanPhoneValue,
+            password: document.getElementById('registerPassword').value
+        };
+        console.log('Отправляемые данные:', data);
+
+        fetch('/timeDelivery/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+            .then(res => res.text())
+            .then(text => console.log(text))
+            .catch(err => console.error(err));
+    });
+
+    //отправка на backend при входе
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const phone = document.getElementById('loginPhone').value;
+        const cleanPhoneValue = cleanPhone(phone);
+        const data = {
+            phone: cleanPhoneValue,
+            password: document.getElementById('loginPassword').value
+        };
+        fetch('/timeDelivery/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(data => {
+                // Сохраняем токен, например, в localStorage
+                localStorage.setItem('token', data.token);
+                // Перенаправляем или показываем сообщение об успешном входе
+                showUniversalToast('Вход', 'Вход выполнен!', 'success');
+            })
+            .catch(err => {
+                showUniversalToast('Ошибка', 'Неверный телефон или пароль', 'danger');
+            });
+    });
+
+
+
     //////////////////////////////////////////////////////////////
         //обработка формы для входа
     document.addEventListener("DOMContentLoaded", function () {
