@@ -355,7 +355,7 @@
 <body>
 <header class="hed d-flex align-items-center justify-content-between bg-light border-bottom px-4 py-2">
     <a href="/timeDelivery/">
-        <img class="logo" src="/Logo.png" alt="logotype">
+        <img class="logo" src="/photos/Logo.png" alt="logotype">
     </a>
     <div class="info d-flex flex-column gap-2">
         <span>Среднее время доставки <span class="orange-text">67 мин.</span></span>
@@ -454,7 +454,7 @@
         <div class="row align-items-center justify-content-between">
             <div class="col-auto">
                 <a class="navbar-brand" href="#">
-                    <img class="logo" src="/Logo.png" alt="logotype">
+                    <img class="logo" src="/photos/Logo.png" alt="logotype">
                 </a>
             </div>
             <div class="col-auto">
@@ -520,7 +520,7 @@
 </div>
 
 <button id="scrollToTopBtn">
-    <img src="/UP.png" alt="Scroll to top" />
+    <img src="/photos/UP.png" alt="Scroll to top" />
 </button>
 
 <!-- информация о доставке, оплате, о компании-->
@@ -535,7 +535,7 @@
                 </h2>
                 <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
                     <div class="accordion-body row">
-                        <img src="/info/delivery.png" alt="Доставка" class="col-12 col-md-3 mb-3 mb-md-0 img-fluid info-img">
+                        <img src="/photos/info/delivery.png" alt="Доставка" class="col-12 col-md-3 mb-3 mb-md-0 img-fluid info-img">
                         <div class="col-12 col-md-9">
                             <p>ДОСТАВКА В ЛЮБОЙ УГОЛОК СЕВАСТОПОЛЯ</p>
                             <span>Сенсей вкуса Мияги готов порадовать своими идеальными сочетаниями вкусов блюд не только в наших ресторанах, но и у вас дома или в офисе!</span><br>
@@ -575,7 +575,7 @@
                 </h2>
                 <div id="flush-collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
                     <div class="accordion-body row">
-                        <img src="/info/cash.png" alt="Оплата" class="col-12 col-md-3 mb-3 mb-md-0 img-fluid info-img">
+                        <img src="/photos/info/cash.png" alt="Оплата" class="col-12 col-md-3 mb-3 mb-md-0 img-fluid info-img">
                         <div class="col-12 col-md-9">
                             <p>ВЫБИРАЙТЕ УДОБНЫЙ ДЛЯ ВАС СПОСОБ ОПЛАТЫ - МЫ СОГЛАСНЫ НА ЛЮБЫЕ УСЛОВИЯ</p>
                             <p>Забота о наших клиентах - главная составляющая концепции Мияги.
@@ -599,7 +599,7 @@
                 </h2>
                 <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
                     <div class="accordion-body row">
-                        <img src="/info/company.png" alt="О компании" class="col-12 col-md-3 mb-3 mb-md-0 img-fluid info-img">
+                        <img src="/photos/info/company.png" alt="О компании" class="col-12 col-md-3 mb-3 mb-md-0 img-fluid info-img">
                         <div class="col-12 col-md-9">
                             <span>Miyagi Family - территория хорошего вкуса.</span><br>
                             <span>Вы можете быть уверенны в нашей работе и ее качестве, потому что:</span>
@@ -630,22 +630,22 @@
                 <div class="d-flex flex-column footer-boxes h-100">
                     <h5>О МИЯГИ</h5>
                     <span class="footer-text">Мы готовим кухню, которую ты захочешь попробовать снова.</span>
-                    <button type="button" class="btn btn-outline-warning btn-footer mt-3" onclick="window.location.href='/restaurants'">Подробнее</button>
+                    <button type="button" class="btn btn-outline-warning btn-footer mt-3" onclick="window.location.href='/timeDelivery/restaurants'">Подробнее</button>
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-lg-2">
                 <div class="d-flex flex-column footer-boxes h-100">
                     <h5>О КОМПАНИИ</h5>
-                    <a href="/restaurants" class="footer-text">Контакты</a>
-                    <a href="/bonuses" class="footer-text">Бонусы и скидки</a>
+                    <a href="/timeDelivery/restaurants" class="footer-text">Контакты</a>
+                    <a href="/timeDelivery/bonuses" class="footer-text">Бонусы и скидки</a>
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-lg-2">
                 <div class="d-flex flex-column footer-boxes h-100">
                     <h5>ДОСТАВКА И ОПЛАТА</h5>
-                    <a href="/delivery" class="footer-text">Доставка</a>
-                    <a href="/payment" class="footer-text">Оплата</a>
-                    <a href="/pickup" class="footer-text">Самовывоз</a>
+                    <a href="/timeDelivery/delivery" class="footer-text">Доставка</a>
+                    <a href="/timeDelivery/payment" class="footer-text">Оплата</a>
+                    <a href="/timeDelivery/pickup" class="footer-text">Самовывоз</a>
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-lg-3">
@@ -749,12 +749,6 @@
             this.reset();
             switchForm('login');
         });
-
-        /*// Валидация формы входа
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showUniversalToast('Успешный вход', 'Вы успешно вошли в систему!', 'success');
-        });*/
     });
 
     //отправка на backend при регистрации
@@ -846,7 +840,7 @@
 
 
 //карусель
-    fetch('/images')
+    fetch('/timeDelivery/images')
         .then(response => response.json())
         .then(images => {
             const carouselInner = document.getElementById('carouselInner');
@@ -874,7 +868,7 @@
                 }
 
                 const img = document.createElement('img');
-                img.src = `/news/${image}`;
+                img.src = `/photos/news/${image}`;
                 img.classList.add('d-block', 'w-100');
                 img.alt = image;
 
@@ -893,7 +887,7 @@
             event.preventDefault();
             const query = encodeURIComponent(searchInput.value.trim());
             if (query) {
-                window.location.href = `/search?query=${query}`;
+                window.location.href = `/timeDelivery/search?query=${query}`;
             }
         }
     });
@@ -973,7 +967,7 @@
         }
 
         // Получаем данные с сервера по адресу /catalog
-        fetch("/catalog")
+        fetch("/timeDelivery/catalog")
             .then(response => {
                 // Проверяем успешность ответа
                 if (!response.ok) {

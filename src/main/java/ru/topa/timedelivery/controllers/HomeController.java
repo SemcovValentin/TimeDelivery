@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.topa.timedelivery.entities.catalog.Dishes;
 import ru.topa.timedelivery.repositories.DishesRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 
 
 @Controller
+@RequestMapping("/timeDelivery")
 public class HomeController {
     @Autowired
     TypeDishesService typeDishesService;
@@ -29,7 +31,7 @@ public class HomeController {
     }
 
 
-    @GetMapping("/timeDelivery/")
+    @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("images", homeService.getCarousel());
         model.addAttribute("categories", typeDishesService.getAllCategories());
@@ -54,7 +56,7 @@ public class HomeController {
         return dishesRepository.findAll();
     }
 
-    @GetMapping("/timeDelivery/catalog/")
+    @GetMapping("/catalogs/")
     public String catalog(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
         return "catalog";

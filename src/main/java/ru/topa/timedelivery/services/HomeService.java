@@ -1,7 +1,6 @@
 package ru.topa.timedelivery.services;
 
 import org.springframework.stereotype.Service;
-import ru.topa.timedelivery.entities.catalog.Dishes;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,7 +11,7 @@ public class HomeService {
 
     public List<String> getCarousel() {
 
-        String folderPath = "src/main/resources/static/news";
+        String folderPath = "D:/Downlands/TimeDelivery/img/news";
         File folder = new File(folderPath);
         if (folder.exists()) {
             File[] files = folder.listFiles();

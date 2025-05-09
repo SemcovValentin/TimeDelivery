@@ -1,5 +1,6 @@
 package ru.topa.timedelivery.security;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,11 +36,13 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .requestMatchers("/**").permitAll()
+                .requestMatchers("/timeDelivery/**").permitAll()
+                .requestMatchers("/photos/**").permitAll()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                /*.requestMatchers("/moderator/**").hasAnyRole("ADMIN","MODERATOR")
+                .requestMatchers("/moderator/**").hasAnyRole("ADMIN","MODERATOR")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN","MODERATOR")
-                .anyRequest().authenticated()*/
+                .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
