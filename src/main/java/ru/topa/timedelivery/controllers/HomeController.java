@@ -91,4 +91,10 @@ public class HomeController {
         model.addAttribute("categories", typeDishesService.getAllCategories());
         return "delivery";
     }
+
+    @GetMapping("/user")
+    public String userPage(Model model) {
+        model.addAttribute("categories", typeDishesService.getAllCategories());
+        return "user";
+    }
 }

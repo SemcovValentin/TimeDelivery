@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>User page</h1>
+<button id="logoutBtn" class="btn btn-danger">Выйти</button>
+
+<script>
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        // Удаляем JWT токен из localStorage или sessionStorage
+        localStorage.removeItem('token');
+        // Перенаправляем на страницу входа или главную
+        window.location.href = '/timeDelivery/'; // или '/'
+    });
+</script>
+
+</body>
+</html>

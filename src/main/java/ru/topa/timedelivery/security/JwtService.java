@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,7 @@ public class JwtService {
             Map<String,Object> extraClaims,
             UserDetails userDetails) {
 
-        return Jwts
+        String token =  Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
@@ -53,9 +55,24 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + getJwtTokenValidity()))
                 .signWith(getSigninKey(), SignatureAlgorithm.HS256)
                 .compact();
+        System.out.println("Generated token: " + token);
+        System.out.println("Using secret key (Base64): " + SECRET_KEY);
+        return token;
     }
 
-    private Claims extractAllClaims(String token){
+    public String extractJwtFromCookies(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+
+    public Claims extractAllClaims(String token){
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSigninKey())
@@ -63,6 +80,7 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
 
     public <T> T extractClaim(String token, Function<Claims,T> claimsResolver){
         Claims claims = extractAllClaims(token);
@@ -83,6 +101,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token,UserDetails userDetails){
         String username = extractUsername(token);
+        System.out.println("Validating token for user: " + username);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 

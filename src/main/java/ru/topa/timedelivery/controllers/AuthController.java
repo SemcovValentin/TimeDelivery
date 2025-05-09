@@ -1,5 +1,7 @@
 package ru.topa.timedelivery.controllers;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,13 +29,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest,
+                                   HttpServletResponse response) {
         try{
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getPhone(), authRequest.getPassword())
             );
             User user = (User) authentication.getPrincipal();
             String jwt = jwtService.generateToken(user);
+            Cookie cookie = new Cookie("jwt", jwt);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true); // включите, если используете HTTPS
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 60); // время жизни в секундах (например, 1 час)
+            response.addCookie(cookie);
             return ResponseEntity.ok(new AuthResponse(jwt));
         }catch (Exception ex){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username");
