@@ -1,22 +1,32 @@
 package ru.topa.timedelivery.services;
 
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.topa.timedelivery.DTOs.UserDTO;
 import ru.topa.timedelivery.entities.persons.User;
 import ru.topa.timedelivery.repositories.UserRepository;
-import ru.topa.timedelivery.utils.RestUtils;
 
-import java.util.Optional;
 
 @Service
 public class UserService {
 
-    @Autowired
-    RestUtils restUtils;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public void checkValidationCreateUser(@Valid UserDTO userDTO){
-        restUtils.createUser(userDTO);
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public void update(User user, UserDTO updateRequest) {
+        user.setName(updateRequest.getName());
+
+        if (updateRequest.getPassword() != null && !updateRequest.getPassword().isBlank()) {
+            String encodedPassword = passwordEncoder.encode(updateRequest.getPassword());
+            user.setPassword(encodedPassword);
+        }
+
+        userRepository.save(user);
     }
 }

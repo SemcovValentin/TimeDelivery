@@ -17,6 +17,9 @@ public class Role {
     public static Role userRole() {
         return new Role("ROLE_USER");
     }
+    public static Role courierRole() {
+        return new Role("ROLE_COURIER");
+    }
     public static Role moderatorRole() {
         return new Role("ROLE_MODERATOR");
     }

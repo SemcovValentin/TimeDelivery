@@ -1,6 +1,7 @@
 package ru.topa.timedelivery.services;
 
 import org.springframework.stereotype.Service;
+import ru.topa.timedelivery.DTOs.ClientDTO;
 import ru.topa.timedelivery.entities.persons.Client;
 import ru.topa.timedelivery.entities.persons.User;
 import ru.topa.timedelivery.models.ClientService;
@@ -34,13 +35,24 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public boolean update(Client client, Long id) {
-        if (!clientRepository.existsById(id)) {
-            return false;
+    public void update(User user, ClientDTO updateRequest) {
+        Client client = clientRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Клиент не найден"));
+
+        if (updateRequest.getEmail() != null) {
+            client.setEmail(updateRequest.getEmail());
         }
-        client.setId(id);
+        if (updateRequest.getAddress() != null) {
+            client.setAddress(updateRequest.getAddress());
+        }
+        if (updateRequest.getCity() != null) {
+            client.setCity(updateRequest.getCity());
+        }
+        if (updateRequest.getBirthday() != null) {
+            client.setBirthday(updateRequest.getBirthday());
+        }
+
         clientRepository.save(client);
-        return true;
     }
 
     @Override

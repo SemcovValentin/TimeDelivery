@@ -56,6 +56,13 @@ public class UserDetailService implements UserDetailsService {
         return registerUser(name, email, phone, password, userRole);
     }
 
+    public User registerCourier(String name, String email, String phone, String password) {
+        Role userRole = roleRepository.findByName("ROLE_COURIER")
+                .orElseGet(() -> roleRepository.save(Role.courierRole()));
+
+        return registerUser(name, email, phone, password, userRole);
+    }
+
     public User registerModerator(String name, String email, String phone, String password) {
         Role userRole = roleRepository.findByName("ROLE_MODERATOR")
                 .orElseGet(() -> roleRepository.save(Role.moderatorRole()));

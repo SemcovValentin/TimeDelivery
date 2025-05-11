@@ -1,4 +1,4 @@
-package ru.topa.timedelivery.controllers;
+/*package ru.topa.timedelivery.controllers;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,4 +25,4 @@ public class TokenController {
         Claims claims = jwtService.extractAllClaims(token);
         return new HashMap<>(claims);
     }
-}
+}*/
