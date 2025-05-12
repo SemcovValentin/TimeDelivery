@@ -19,14 +19,21 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void update(User user, UserDTO updateRequest) {
-        user.setName(updateRequest.getName());
-
-        if (updateRequest.getPassword() != null && !updateRequest.getPassword().isBlank()) {
-            String encodedPassword = passwordEncoder.encode(updateRequest.getPassword());
-            user.setPassword(encodedPassword);
+    public boolean updateUserWithPasswordCheck(User user, UserDTO req) {
+        // Проверяем текущий пароль
+        if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
+            return false;
         }
-
+        // Меняем телефон
+        if (req.getPhone() != null) {
+            user.setName(req.getPhone());
+        }
+        // Меняем пароль, если новый задан
+        if (req.getNewPassword() != null && !req.getNewPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        }
         userRepository.save(user);
+        return true;
     }
+
 }

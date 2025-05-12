@@ -1,21 +1,26 @@
 package ru.topa.timedelivery.entities.persons;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import ru.topa.timedelivery.entities.orders.Order;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+
 @Entity
 @Table(name = "users")
 @Data
+@EqualsAndHashCode(exclude = {"orders", "client"})
 public class User implements UserDetails {
 
     @Id
@@ -36,7 +41,12 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
 
     @OneToOne(mappedBy = "user")
+    @JsonManagedReference
     private Client client;
+
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference
+    private Set<Order> order;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

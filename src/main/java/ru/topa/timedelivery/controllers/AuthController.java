@@ -1,6 +1,7 @@
 package ru.topa.timedelivery.controllers;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +46,7 @@ public class AuthController {
         }
         User user = (User) authentication.getPrincipal();
         UserDTO userDTO = new UserDTO();
-        userDTO.setName(user.getName());
+        userDTO.setPhone(user.getName());
         return ResponseEntity.ok(userDTO);
     }
 
@@ -89,6 +90,19 @@ public class AuthController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        boolean isSecure = request.isSecure();
+
+        Cookie cookie = new Cookie("jwt", "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(isSecure);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return ResponseEntity.ok().build();
     }
 
 

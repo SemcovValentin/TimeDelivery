@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
     <link rel="stylesheet" th:href="@{/styles/homeS.css}" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
 
 </head>
 <body>
@@ -28,7 +30,35 @@
             Вход
         </button>
 
-        <div><a href="#" class="btn btn-cart btn-cart-color btn-sm"><i class="bi bi-cart"></i>КОРЗИНА</a></div>
+        <a href="#" class="btn btn-cart btn-cart-color btn-sm cart-btn position-relative">
+            <i class="bi bi-cart"></i>КОРЗИНА
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" style="display:none;">
+        0
+        <span class="visually-hidden">товаров в корзине</span>
+    </span>
+        </a>
+    </div>
+
+    <!-- Модальное окно корзины -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background-color: #222; color: #eee;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cartModalLabel">Ваш заказ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartTableContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="submitOrderBtn" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
+                        Оформить заказ
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
@@ -126,7 +156,13 @@
             </div>
             <div class="col-auto d-flex align-items-center">
                 <span class="me-2 text-secondary">📞 +7 (978) 999-99-99</span>
-                <div><a href="#" class="btn btn-cart btn-cart-color btn-sm"><i class="bi bi-cart"></i>КОРЗИНА</a></div>
+                <a href="#" class="btn btn-cart btn-cart-color btn-sm cart-btn position-relative">
+                    <i class="bi bi-cart"></i>КОРЗИНА
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" style="display:none;">
+        0
+        <span class="visually-hidden">товаров в корзине</span>
+    </span>
+                </a>
             </div>
         </div>
     </div>

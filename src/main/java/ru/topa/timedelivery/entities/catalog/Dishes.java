@@ -1,5 +1,6 @@
 package ru.topa.timedelivery.entities.catalog;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +8,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.topa.timedelivery.entities.orders.OrderItem;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,6 +54,10 @@ public class Dishes {
 
     @Column(name = "is_new", nullable = false, columnDefinition = "BIT")
     private boolean isNew;
+
+    @OneToMany(mappedBy = "dish")
+    @JsonBackReference
+    private Set<OrderItem> orderItems;
 
 
     @ManyToMany(fetch = FetchType.EAGER)

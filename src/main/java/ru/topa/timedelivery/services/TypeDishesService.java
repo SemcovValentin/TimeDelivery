@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.topa.timedelivery.entities.catalog.TypeDishes;
 import ru.topa.timedelivery.repositories.TypeDishesRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 

@@ -30,22 +30,21 @@ public class UserController {
         return "user";
     }
 
-    @PutMapping("/updateUser")
-    public ResponseEntity<?> updateUser(@RequestBody @Valid UserDTO updateRequest,
-                                        Authentication authentication) {
+    @PutMapping("/update")
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO req, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         User user = (User) authentication.getPrincipal();
 
-        try {
-            userService.update(user, updateRequest);
+        boolean ok = userService.updateUserWithPasswordCheck(user, req);
+        if (ok) {
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Текущий пароль неверный");
         }
     }
+
 
     @PutMapping("/updateClient")
     public ResponseEntity<?> updateClient(@RequestBody @Valid ClientDTO updateRequest,

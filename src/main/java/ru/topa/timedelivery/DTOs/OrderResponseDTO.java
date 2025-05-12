@@ -6,10 +6,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class OrderDTO {
-    private Long id;
+public class OrderResponseDTO {
+    private Long orderId;
     private String status;
     private LocalDateTime createdAt;
     private List<OrderItemDTO> items;
-
 }

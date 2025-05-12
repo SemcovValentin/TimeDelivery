@@ -1,8 +1,10 @@
 package ru.topa.timedelivery.entities.persons;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import jakarta.validation.constraints.*;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "clients")
 @Data
+@EqualsAndHashCode(exclude = {"user"})
 public class Client {
 
     @Id
@@ -40,6 +43,7 @@ public class Client {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id",referencedColumnName = "id")
+    @JsonBackReference
     private User user;
 
     @NotBlank

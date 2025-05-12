@@ -28,11 +28,13 @@ public class AdminController {
 
 
     @GetMapping("/addAll")
+    @ResponseBody
     public String addAll() {
         service.addAllCategories();
         dishesService.addAllDishes();
         return "all dishas is added";
     }
+
 
     @GetMapping
     public List<TypeDishes> getAll() {
