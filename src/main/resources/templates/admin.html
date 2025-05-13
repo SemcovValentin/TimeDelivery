@@ -7,11 +7,24 @@
 <button id="logoutBtn" class="btn btn-danger">Выйти</button>
 
 <script>
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        // Удаляем JWT токен из localStorage или sessionStorage
+    //кнопка выхода
+    document.getElementById('logoutBtn').addEventListener('click', async function (e) {
+        e.preventDefault();
+        try {
+            // Вызов серверного logout для удаления httpOnly cookie
+            await fetch('/timeDelivery/logout', {method: 'POST', credentials: 'include'});
+        } catch (err) {
+            // Можно обработать ошибку, если нужно
+            console.error('Ошибка при выходе:', err);
+        }
+        // Очищаем localStorage
         localStorage.removeItem('token');
-        // Перенаправляем на страницу входа или главную
-        window.location.href = '/timeDelivery/'; // или '/'
+        localStorage.removeItem('roles');
+        localStorage.removeItem('clientName');
+        // На всякий случай пробуем удалить jwt-куку на клиенте
+        document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        // Редирект на страницу входа
+        window.location.href = '/timeDelivery/'; // замените на ваш путь к странице логина
     });
 </script>
 

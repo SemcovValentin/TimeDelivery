@@ -190,134 +190,357 @@
         font-size: 0.9rem;
     }
 
+    /* Правая колонка - таблица заказов */
+    .flex-grow-1 {
+        background-color: #222; /* основной тёмный фон */
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        color: #eee;
+        overflow-y: auto;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Заголовок */
+    .flex-grow-1 h2 {
+        color: #ccc;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        user-select: none;
+    }
+
+    /* Таблица заказов */
+    .flex-grow-1 table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.75rem; /* отступы между строками */
+        background-color: #2f2f2f; /* чуть светлее основного фона */
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Переопределение Bootstrap классов для тёмной темы */
+    .flex-grow-1 .table {
+        background-color: #2f2f2f !important;
+        color: #eee !important;
+    }
+
+    /* Заголовки таблицы */
+    .flex-grow-1 .table thead th {
+        background-color: #3a3a3a !important;
+        color: #eee !important; /* заменили на светло-серый/белый */
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        user-select: none;
+        text-shadow: none; /* можно убрать тень для чистоты */
+    }
+
+    /* Чёрный текст в строках с товарами */
+    .flex-grow-1 .table-striped > tbody > tr:nth-of-type(odd),
+    .flex-grow-1 .table-striped > tbody > tr:nth-of-type(even),
+    .flex-grow-1 .table tbody tr {
+        background-color: #444 !important;
+        color: #000 !important; /* Чёрный текст */
+        border-radius: 6px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .flex-grow-1 .table tbody tr:hover {
+        background-color: #666 !important;
+        color: #000 !important; /* Чёрный текст при ховере */
+    }
+
+    /* Заголовок */
+    .flex-grow-1 table.table thead th {
+        background-color: #3a3a3a !important;
+        color: #ccc !important;
+    }
+
+    /* Ячейки с чёрным текстом */
+    .flex-grow-1 table.table tbody td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+        color: #000 !important; /* Чёрный текст */
+        border-top: 1px solid #444 !important;
+        transition: color 0.3s ease;
+    }
+
+
+    /* Цвет текста при ховере по строке */
+    .flex-grow-1 .table tbody tr:hover td {
+        color: #000 !important; /* Чёрный текст при ховере */
+    }
+
+    /* Ссылки в ячейках */
+    .flex-grow-1 table.table tbody td a {
+        color: black;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .flex-grow-1 table.table tbody td a:hover {
+        color: #ccc !important; /* чуть светлее при ховере */
+    }
+
+    /* Нижняя строка с итогом */
+    .flex-grow-1 tfoot td {
+        padding: 1rem;
+        font-weight: 700;
+        color: #eee;
+        border-top: 2px solid #555;
+        background-color: #3a3a3a;
+        text-shadow: none;
+    }
+
+    /* Сообщение об отсутствии заказов */
+    #userOrdersEmptyMessage {
+        font-size: 1.2rem;
+        margin-top: 3rem;
+        color: #bbb;
+        user-select: none;
+    }
+
+    /* Скроллбар для правой колонки */
+    .flex-grow-1::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .flex-grow-1::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 4px;
+    }
+
+    .flex-grow-1::-webkit-scrollbar-thumb {
+        background-color: #555;
+        border-radius: 4px;
+    }
+
+    /* Скроллбар при ховере */
+    .flex-grow-1::-webkit-scrollbar-thumb:hover {
+        background-color: #ccc;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .container > .d-flex {
+            flex-direction: column;
+            height: auto;
+        }
+
+        .custom-card {
+            width: 100% !important;
+            margin-bottom: 1rem;
+        }
+
+        .flex-grow-1 {
+            max-height: none;
+            overflow-y: visible;
+            padding: 1rem;
+        }
+    }
+
+    .flex-grow-1 table {
+        font-size: 1.2rem;
+    }
+
+    .order-number {
+        font-size: 1.20rem;
+        font-weight: 600;
+    }
+
 </style>
 <body>
 <h1>Добро пожаловать!</h1>
 
 <div class="container" style="height: 700px">
-    <div class="card mb-3 custom-card" style="width: 18rem;">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h5 id="clientName">Имя пользователя</h5>
-                <button id="logoutBtn" class="btn btn-outline-danger btn-sm ms-2">Выйти</button>
-            </div>
-            <div class="d-grid gap-2 mb-2">
-                <button id="BackBtn" class="btn btn-outline-warning btn-footer"
-                        onclick="window.location.href='/timeDelivery/'">Назад
-                </button>
-                <button class="btn btn-outline-warning btn-footer" type="button" data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasUserEdit" aria-controls="offcanvasUserEdit">
-                    Безопасность
-                </button>
-                <button class="btn btn-outline-warning btn-footer" type="button" data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasClientEdit" aria-controls="offcanvasClientEdit">
-                    Контактные данные
-                </button>
-                <button id="ordersBtn" class="btn btn-outline-warning btn-footer">Заказы</button>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="container mt-3">
-        <!-- Offcanvas для редактирования пользователя -->
-        <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasUserEdit"
-             aria-labelledby="offcanvasUserEditLabel">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="offcanvasUserEditLabel">Безопасность</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
-            </div>
-            <div class="offcanvas-body">
-                <form id="userEditForm" class="auth-form" novalidate>
-                    <div class="mb-3">
-                        <label for="userPhoneInput" class="form-label">Телефон:</label>
-                        <input type="text" class="form-control" id="userPhoneInput" name="phone" required/>
-                    </div>
-                    <div class="mb-3">
-                        <label for="userPasswordCurrent" class="form-label">Текущий пароль:</label>
-                        <input type="password" class="form-control" id="userPasswordCurrent" name="currentPassword"
-                               minlength="6" required/>
-                    </div>
-                    <div class="mb-3">
-                        <label for="userPasswordNew" class="form-label">Новый пароль:</label>
-                        <input type="password" class="form-control" id="userPasswordNew" name="newPassword"
-                               minlength="6"/>
-                    </div>
-                    <div class="mb-3">
-                        <label for="userPasswordNewCheck" class="form-label">Повторите новый пароль:</label>
-                        <input type="password" class="form-control" id="userPasswordNewCheck" name="newPasswordCheck"
-                               minlength="6"/>
-                    </div>
-                    <button type="submit" class="btn btn-success">Сохранить</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Offcanvas для редактирования client-->
-        <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasClientEdit"
-             aria-labelledby="offcanvasClientEditLabel">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="offcanvasClientEditLabel">Контактные данные</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
-            </div>
-            <div class="offcanvas-body">
-                <form id="clientEditForm" class="auth-form">
-                    <div class="mb-3 form-group">
-                        <label for="clientNameInput" class="form-label">Имя</label>
-                        <input type="text" class="form-control" id="clientNameInput" name="name" required/>
-                    </div>
-                    <div class="mb-3 form-group">
-                        <label for="clientEmailInput" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="clientEmailInput" name="email" required/>
-                    </div>
-                    <div class="mb-3 form-group">
-                        <label for="clientAddressInput" class="form-label">Адрес</label>
-                        <input type="text" class="form-control" id="clientAddressInput" name="address"/>
-                    </div>
-                    <div class="mb-3 form-group">
-                        <label for="clientCityInput" class="form-label">Город</label>
-                        <input type="text" class="form-control" id="clientCityInput" name="city"/>
-                    </div>
-                    <div class="mb-3 form-group">
-                        <label for="clientBirthdayInput" class="form-label">Дата рождения</label>
-                        <input type="date" class="form-control" id="clientBirthdayInput" name="birthday"/>
-                    </div>
-                    <button type="submit" class="btn btn-success">Сохранить</button>
-                </form>
-            </div>
-        </div>
-
-        <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
-            <div id="universalToast" class="toast align-items-center text-bg-dark border-0" role="alert"
-                 aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                <div class="toast-header">
-                    <strong class="me-auto toast-title">Уведомление</strong>
-                    <small>Система</small>
-                    <button type="button" class="btn-close btn-close-white ms-2 mb-1" data-bs-dismiss="toast"
-                            aria-label="Закрыть"></button>
+    <div class="d-flex h-100">
+        <!-- Левая колонка: меню -->
+        <div class="card mb-3 custom-card" style="width: 18rem;">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 id="clientName">Имя пользователя</h5>
+                    <button id="logoutBtn" class="btn btn-outline-danger btn-sm ms-2">Выйти</button>
                 </div>
-                <div class="toast-body">
-                    Сообщение
+                <div class="d-grid gap-2 mb-2">
+                    <button id="BackBtn" class="btn btn-outline-warning btn-footer"
+                            onclick="window.location.href='/timeDelivery/'">Назад
+                    </button>
+                    <button class="btn btn-outline-warning btn-footer" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasUserEdit" aria-controls="offcanvasUserEdit">
+                        Безопасность
+                    </button>
+                    <button class="btn btn-outline-warning btn-footer" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasClientEdit" aria-controls="offcanvasClientEdit">
+                        Контактные данные
+                    </button>
+                    <a href="#" class="btn btn-outline-warning btn-footer position-relative cart-btn"
+                       data-bs-toggle="modal" data-bs-target="#cartModal">
+                        <i class="bi bi-cart me-1"></i>КОРЗИНА
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" style="display:none;">
+                                 0
+                            <span class="visually-hidden">товаров в корзине</span>
+                        </span>
+                    </a>
+
+
                 </div>
             </div>
         </div>
 
+        <!-- Модальное окно корзины -->
+        <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content" style="background-color: #222; color: #eee;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cartModalLabel">Ваш заказ</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Закрыть"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="cartTableContainer"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="submitOrderBtn" class="btn btn-success">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"
+                                  style="display: none;"></span>
+                            Оформить заказ
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Правая колонка: таблица заказов -->
+        <div class="flex-grow-1 ms-4 overflow-auto" style="max-height: 700px;">
+            <h2 class="mb-4">Мои заказы</h2>
+            <div id="userOrdersTableContainer">
+            </div>
+            <div id="userOrdersEmptyMessage" class="text-center text-muted" style="display:none;">
+                У вас пока нет заказов.
+            </div>
+        </div>
     </div>
 </div>
 
 
+<div class="container mt-3">
+    <!-- Offcanvas для редактирования пользователя -->
+    <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasUserEdit"
+         aria-labelledby="offcanvasUserEditLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasUserEditLabel">Безопасность</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form id="userEditForm" class="auth-form" novalidate>
+                <div class="mb-3">
+                    <label for="userPhoneInput" class="form-label">Телефон:</label>
+                    <input type="text" class="form-control" id="userPhoneInput" name="phone" required/>
+                </div>
+                <div class="mb-3">
+                    <label for="userPasswordCurrent" class="form-label">Текущий пароль:</label>
+                    <input type="password" class="form-control" id="userPasswordCurrent" name="currentPassword"
+                           minlength="6" required/>
+                </div>
+                <div class="mb-3">
+                    <label for="userPasswordNew" class="form-label">Новый пароль:</label>
+                    <input type="password" class="form-control" id="userPasswordNew" name="newPassword"
+                           minlength="6"/>
+                </div>
+                <div class="mb-3">
+                    <label for="userPasswordNewCheck" class="form-label">Повторите новый пароль:</label>
+                    <input type="password" class="form-control" id="userPasswordNewCheck" name="newPasswordCheck"
+                           minlength="6"/>
+                </div>
+                <button type="submit" class="btn btn-success">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Offcanvas для редактирования client-->
+    <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasClientEdit"
+         aria-labelledby="offcanvasClientEditLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasClientEditLabel">Контактные данные</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form id="clientEditForm" class="auth-form">
+                <div class="mb-3 form-group">
+                    <label for="clientNameInput" class="form-label">Имя</label>
+                    <input type="text" class="form-control" id="clientNameInput" name="name" required/>
+                </div>
+                <div class="mb-3 form-group">
+                    <label for="clientEmailInput" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="clientEmailInput" name="email" required/>
+                </div>
+                <div class="mb-3 form-group">
+                    <label for="clientAddressInput" class="form-label">Адрес</label>
+                    <input type="text" class="form-control" id="clientAddressInput" name="address"/>
+                </div>
+                <div class="mb-3 form-group">
+                    <label for="clientCityInput" class="form-label">Город</label>
+                    <input type="text" class="form-control" id="clientCityInput" name="city"/>
+                </div>
+                <div class="mb-3 form-group">
+                    <label for="clientBirthdayInput" class="form-label">Дата рождения</label>
+                    <input type="date" class="form-control" id="clientBirthdayInput" name="birthday"/>
+                </div>
+                <button type="submit" class="btn btn-success">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="universalToast"
+         class="toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3" role="alert"
+         aria-live="assertive" aria-atomic="true" style="min-width: 250px; z-index: 1080;">
+        <div class="toast-header bg-success text-white">
+            <strong class="me-auto toast-title">Заголовок</strong>
+            <button type="button" class="btn-close btn-close-white ms-2 mb-1" data-bs-dismiss="toast"
+                    aria-label="Закрыть"></button>
+        </div>
+        <div class="toast-body toast-body">
+            Сообщение
+        </div>
+    </div>
+
+
+</div>
+
+
 <script>
+
+    async function loadAllDishes() {
+        try {
+            const response = await fetch('/timeDelivery/catalog', {credentials: 'include'});
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки блюд');
+            }
+            const dishes = await response.json();
+            return dishes;
+        } catch (error) {
+            console.error('Ошибка при загрузке блюд:', error);
+            return [];
+        }
+    }
+
     // Универсальная функция показа Toast
     function showUniversalToast(title, message, type = 'success') {
         const toastEl = document.getElementById('universalToast');
+        if (!toastEl) {
+            console.error('Toast элемент с id "universalToast" не найден');
+            return;
+        }
+
         const toastTitle = toastEl.querySelector('.toast-title');
         const toastBody = toastEl.querySelector('.toast-body');
         const toastHeader = toastEl.querySelector('.toast-header');
 
-        // Сброс и установка классов для цвета
         toastEl.classList.remove('bg-success', 'bg-info', 'bg-warning', 'bg-danger');
         toastHeader.classList.remove('bg-success', 'bg-info', 'bg-warning', 'bg-danger');
+
         toastEl.classList.add('bg-' + type);
         toastHeader.classList.add('bg-' + type);
 
@@ -522,6 +745,132 @@
             showUniversalToast('Успех', 'Client данные обновлены', 'success');
         } catch (e) {
             showUniversalToast('Ошибка', e.message, 'danger');
+        }
+    });
+
+    //////////////////////////////////////////////////////
+    // Функция для рендера таблицы заказов пользователя
+    function renderUserOrdersTable(userOrders, allDishes) {
+        const container = document.getElementById('userOrdersTableContainer');
+        const emptyMessage = document.getElementById('userOrdersEmptyMessage');
+
+        if (!userOrders || userOrders.length === 0) {
+            container.innerHTML = '';
+            emptyMessage.style.display = 'block';
+            return;
+        }
+
+        emptyMessage.style.display = 'none';
+
+        let html = '';
+
+        userOrders.forEach(order => {
+            if (!order.id) {
+                console.warn('Пропущен заказ без id:', order);
+                return;
+            }
+
+            let itemsRows = '';
+            let total = 0;
+
+            if (!Array.isArray(order.items) || order.items.length === 0) {
+                itemsRows = `<tr><td colspan="5" class="text-center text-muted">В этом заказе нет товаров</td></tr>`;
+            } else {
+                order.items.forEach(item => {
+                    if (!item.dishName || !item.price || !item.quantity) {
+                        console.warn('Пропущен товар с неполными данными:', item);
+                        return;
+                    }
+                    const sum = item.price * item.quantity;
+                    total += sum;
+
+                    const dish = allDishes.find(d => d.name === item.dishName);
+                    const encodedImageUrl = dish ? '/photos' + encodeURI(dish.imageUrl) : '/photos/default.jpg';
+                    const altText = dish ? dish.name : item.dishName;
+                    const query = encodeURIComponent(altText);
+
+                    itemsRows += `
+                    <tr>
+                        <td>
+                            <a href="/timeDelivery/search?query=${query}" target="_blank" rel="noopener noreferrer">
+                                <img src="${encodedImageUrl}" alt="${altText}" style="width:60px; height:40px; object-fit:cover; border-radius: 4px;">
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/timeDelivery/search?query=${query}" class="link-black-no-underline" target="_blank" rel="noopener noreferrer">${altText}</a>
+                        </td>
+                        <td>${item.price} руб.</td>
+                        <td>${item.quantity}</td>
+                        <td>${sum} руб.</td>
+                    </tr>
+                `;
+                });
+            }
+
+            html += `
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="order-number">Заказ №${order.id}</div>
+                    <div><small class="order-number">Дата: ${new Date(order.createdAt).toLocaleString()}</small></div>
+                    <div><span class="badge bg-info text-dark">${order.status || 'Неизвестен'}</span></div>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Блюдо</th>
+                                <th>Цена</th>
+                                <th>Кол-во</th>
+                                <th>Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsRows}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end"><b>Итого:</b></td>
+                                <td><b>${total} руб.</b></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    async function loadAndRenderUserOrders(userOrders) {
+        const allDishes = await loadAllDishes();
+        renderUserOrdersTable(userOrders, allDishes);
+    }
+
+
+    // Загрузка данных и вызов рендера при загрузке страницы
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/timeDelivery/orders/userOrders', {
+                credentials: 'include'
+            });
+
+            if (!response.ok) throw new Error(`Ошибка загрузки заказов: ${response.status} ${response.statusText}`);
+
+            const userOrders = await response.json();
+
+            if (!Array.isArray(userOrders)) {
+                throw new Error('Некорректный формат данных заказов');
+            }
+
+            loadAndRenderUserOrders(userOrders);
+        } catch (error) {
+            console.error('Ошибка при загрузке заказов:', error);
+            const container = document.getElementById('userOrdersTableContainer');
+            container.innerHTML = '<p class="text-danger">Не удалось загрузить заказы.</p>';
+            const emptyMessage = document.getElementById('userOrdersEmptyMessage');
+            emptyMessage.style.display = 'none';
         }
     });
 

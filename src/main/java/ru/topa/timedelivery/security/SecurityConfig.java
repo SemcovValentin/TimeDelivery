@@ -43,7 +43,6 @@ public class SecurityConfig {
                         .requestMatchers("/styles/**").permitAll()
                         .requestMatchers("/timeDelivery/**").permitAll()
                         .requestMatchers("/photos/**").permitAll()
-                        .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/admin","/admin/**").hasRole("ADMIN")
                         .requestMatchers("/moderator","/moderator/**").hasAnyRole("ADMIN", "MODERATOR")
                         .requestMatchers("/courier","/courier/**").hasAnyRole("ADMIN", "MODERATOR","COURIER")

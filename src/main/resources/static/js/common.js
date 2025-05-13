@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////
 //форма входа и регистрации
-// Универсальная функция показа Toast
+// Универсальная функция показа
 function showUniversalToast(title, message, type = 'success') {
     const toastEl = document.getElementById('universalToast');
     const toastTitle = toastEl.querySelector('.toast-title');
@@ -21,6 +21,26 @@ function showUniversalToast(title, message, type = 'success') {
 
     setTimeout(() => toast.hide(), 5000);
 }
+//модальное окно для вызова не зарегистрированным пользователем
+function showAuthRequiredModal() {
+    const modalEl = document.getElementById('authRequiredModal');
+    const modal = new bootstrap.Modal(modalEl, {
+        backdrop: 'static',
+        keyboard: true
+    });
+    modal.show();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const authModalEl = document.getElementById('authRequiredModal');
+    if (authModalEl) {
+        authModalEl.addEventListener('hide.bs.modal', () => {
+            if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+            }
+        });
+    }
+});
 
 // Очистка номера телефона - оставляем только + и цифры
 function cleanPhone(phone) {
@@ -532,6 +552,7 @@ function renderCartTable(dishes) {
 
     Object.keys(cart).forEach(dishId => {
         const dish = dishes.find(d => d.id == dishId);
+        const encodedImageUrl = '/photos' + encodeURI(dish.imageUrl);
         if (!dish) return;
         const count = cart[dishId];
         const sum = dish.price * count;
@@ -540,7 +561,7 @@ function renderCartTable(dishes) {
     <tr>
         <td>
             <a href="/timeDelivery/search?query=${encodeURIComponent(dish.name)}" target="_blank">
-                <img src="${dish.imageUrl}" alt="${dish.name}" style="width:60px; height:40px; object-fit:cover;">
+                <img src="${encodedImageUrl}" alt="${dish.name}" style="width:60px; height:40px; object-fit:cover;">
             </a>
         </td>
         <td>
@@ -679,58 +700,110 @@ function updateCardBadges() {
         }
     });
 }
+// функция проверки авторизации через сервер
+async function userIsAuthorized() {
+    try {
+        const response = await fetch('/timeDelivery/user/me', {
+            credentials: 'include'
+        });
+        return response.ok;
+    } catch (e) {
+        console.error('Ошибка при проверке авторизации:', e);
+        return false;
+    }
+}
+
+document.getElementById('authModalLoginBtn').addEventListener('click', () => {
+    // Закрываем модальное окно авторизации
+    const authModalEl = document.getElementById('authRequiredModal');
+    const authModalInstance = bootstrap.Modal.getInstance(authModalEl);
+    if (authModalInstance) {
+        authModalInstance.hide();
+    }
+    // Закрываем модальное окно корзины, если открыто
+    const cartModalEl = document.getElementById('cartModal');
+    const cartModalInstance = bootstrap.Modal.getInstance(cartModalEl);
+    if (cartModalInstance) {
+        cartModalInstance.hide();
+    }
+
+});
 
 //Оформление заказа
 document.getElementById('submitOrderBtn').addEventListener('click', async function() {
     const cart = JSON.parse(localStorage.getItem('cart') || '{}');
+
+    // Асинхронно проверяем авторизацию
+    if (!(await userIsAuthorized())) {
+        showAuthRequiredModal();
+        return;
+    }
 
     if (Object.keys(cart).length === 0) {
         showUniversalToast('Ошибка', 'Корзина пуста', 'danger');
         return;
     }
 
-    fetch('/timeDelivery/orders/create', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'  // Обязательно указываем тип содержимого
-            // НЕ добавляем заголовок Authorization, так как используем cookie для аутентификации
-        },
-        credentials: 'include', // Важно! Чтобы браузер отправлял cookie с запросом
-        body: JSON.stringify({ items: cart }),
-        redirect: 'manual' // Опционально: чтобы не следовать редиректам автоматически
-    })
-        .then(async response => {
-            if (response.status === 401 || response.status === 403) {
-                // Пользователь не авторизован - показываем модальное окно логина
-                showLoginModal();
-                throw new Error('Пользователь не авторизован');
-            }
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Ошибка оформления заказа');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Успешно оформили заказ
-            localStorage.removeItem('cart');
-            renderCartTable(allDishes);
-            updateCartBadge();
-            updateCardBadges();
+    // Проверяем наличие блюд
+    const dishIds = Object.keys(cart);
+    const missingDishes = dishIds.filter(id => !allDishes.find(d => d.id == id));
+    if (missingDishes.length > 0) {
+        showUniversalToast('Ошибка', 'Некоторые блюда больше недоступны. Пожалуйста, обновите корзину.', 'danger');
+        missingDishes.forEach(id => delete cart[id]);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCartTable(allDishes);
+        updateCartBadge();
+        updateCardBadges();
+        return;
+    }
 
-            showUniversalToast('Успех', 'Заказ успешно оформлен! Номер заказа: ' + data.orderId, 'success');
-
-            const cartModalEl = document.getElementById('cartModal');
-            const modalInstance = bootstrap.Modal.getInstance(cartModalEl);
-            if (modalInstance) {
-                modalInstance.hide();
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка при оформлении заказа:', error);
-            showUniversalToast('Ошибка', error.message, 'danger');
-        })
+    try {
+        const response = await fetch('/timeDelivery/orders/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ items: cart }),
+            redirect: 'manual'
         });
+
+        if (response.status === 401 || response.status === 403) {
+            showAuthRequiredModal();
+            throw new Error('Пользователь не авторизован');
+        }
+
+        if (!response.ok) {
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch {
+                errorData = {};
+            }
+            throw new Error(errorData.error || 'Ошибка оформления заказа');
+        }
+
+        const data = await response.json();
+
+        // Успешно оформили заказ
+        localStorage.removeItem('cart');
+        renderCartTable(allDishes);
+        updateCartBadge();
+        updateCardBadges();
+
+        const orderId = data.orderId || 'неизвестен';
+        showUniversalToast('Успех', 'Заказ успешно оформлен! Номер заказа: ' + orderId, 'success');
+
+        const cartModalEl = document.getElementById('cartModal');
+        const modalInstance = bootstrap.Modal.getInstance(cartModalEl);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+
+    } catch (error) {
+        console.error('Ошибка при оформлении заказа:', error);
+        showUniversalToast('Ошибка', error.message, 'danger');
+    }
+});
+
 
 
 

@@ -95,43 +95,6 @@ public class OrderService {
         return dto;
     }
 
-
-    /*@Transactional
-    public Order createOrder(OrderRequest request, String username) {
-        User user = userRepository.findByName(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Order order = new Order();
-        order.setUser(user);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setStatus("NEW");
-        order = orderRepository.save(order);
-
-        List<OrderItem> items = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : request.getItems().entrySet()) {
-            Long dishId = Long.valueOf(entry.getKey());
-            Integer quantity = entry.getValue();
-
-            if (quantity == null || quantity <= 0) {
-                throw new IllegalArgumentException("Quantity must be positive");
-            }
-
-            Dishes dish = dishRepository.findById(dishId)
-                    .orElseThrow(() -> new RuntimeException("Dish not found"));
-
-            OrderItem item = new OrderItem();
-            item.setOrder(order);
-            item.setDish(dish);
-            item.setQuantity(quantity);
-            item.setPrice(dish.getPrice());
-            items.add(item);
-        }
-
-        orderItemRepository.saveAll(items);
-        order.getOrderItems().addAll(items);
-
-        return order;
-    }*/
     @Transactional
     public Order createOrder(OrderRequest request, String username) {
         User user = userRepository.findByName(username)
