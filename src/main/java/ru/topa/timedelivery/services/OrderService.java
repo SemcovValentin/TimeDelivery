@@ -29,8 +29,6 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
-    private OrderItemRepository orderItemRepository;
-    @Autowired
     private DishesRepository dishRepository;
     @Autowired
     private UserRepository userRepository;
@@ -40,6 +38,7 @@ public class OrderService {
         dto.setId(order.getId());
         dto.setStatus(order.getStatus());
         dto.setCreatedAt(order.getCreatedAt());
+        dto.setComment(order.getComment());
 
         List<OrderItemDTO> items = order.getOrderItems().stream()
                 .map(this::toOrderItemDTO)
@@ -87,7 +86,6 @@ public class OrderService {
             copy.setDishName(item.getDishName());
             copy.setQuantity(item.getQuantity());
             copy.setPrice(item.getPrice());
-            // Если есть вложенные коллекции, копируйте их тоже
             safeItems.add(copy);
         }
 
@@ -104,6 +102,7 @@ public class OrderService {
         order.setUser(user);
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus("NEW");
+        order.setComment(request.getComment());
 
         List<OrderItem> items = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : request.getItems().entrySet()) {
@@ -133,7 +132,5 @@ public class OrderService {
 
         return order;
     }
-
-
 
 }

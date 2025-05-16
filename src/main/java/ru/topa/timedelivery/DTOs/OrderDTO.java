@@ -11,5 +11,5 @@ public class OrderDTO {
     private String status;
     private LocalDateTime createdAt;
     private List<OrderItemDTO> items;
-
+    private String comment;
 }

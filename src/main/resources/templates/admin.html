@@ -4,7 +4,7 @@
 <body>
 <h1>Админка</h1>
 <div id="content"></div>
-<button id="logoutBtn" class="btn btn-danger">Выйти</button>
+<button id="logoutBtn" class="btn btn-outline-danger btn-sm ms-2">Выйти</button>
 
 <script>
     //кнопка выхода
@@ -21,6 +21,8 @@
         localStorage.removeItem('token');
         localStorage.removeItem('roles');
         localStorage.removeItem('clientName');
+        localStorage.removeItem('cart');
+        localStorage.removeItem('cartComment');
         // На всякий случай пробуем удалить jwt-куку на клиенте
         document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         // Редирект на страницу входа

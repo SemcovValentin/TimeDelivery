@@ -26,6 +26,9 @@ public class Order {
 
     private String status;
 
+    @Column(name = "comment", columnDefinition = "TEXT") //
+    private String comment;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonManagedReference
@@ -34,5 +37,4 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<OrderItem> orderItems = new HashSet<>();
-
 }
