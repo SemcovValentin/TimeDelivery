@@ -1,4 +1,3 @@
-/* форма входа и регистрации */
 .offcanvas {
     background-color: #222;
     color: #888;
@@ -98,42 +97,12 @@
     color: #888;
 }
 
-/*футер*/
-.footer-bg {
-    background-color: #222;
-    width: 100%;
-}
-
-.footer-bg h5 {
-    color: #ff9900;
-    margin-bottom: 0.5rem;
-}
-
-.footer-text {
-    color: #ccc;
-    font-size: 0.97rem;
-    margin-bottom: 0.5rem;
-    text-decoration: none;
-}
-
-.footer .btn-footer {
-    width: fit-content;
-    align-self: flex-start;
-}
-
-a.footer-text:hover {
-    color: #ff9900;
-    text-decoration: underline;
-}
-
-.footer-text:hover {
-    color: #ff9900;
-}
 
 body {
     font-family: "Times New Roman", Times, serif;
 }
 
+/*левая колонка меню*/
 .custom-card {
     background-color: #222;
     color: #eee;
