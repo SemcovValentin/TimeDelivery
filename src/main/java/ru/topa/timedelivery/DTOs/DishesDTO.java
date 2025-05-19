@@ -2,6 +2,7 @@ package ru.topa.timedelivery.DTOs;
 
 import lombok.Data;
 import ru.topa.timedelivery.entities.catalog.Dishes;
+import ru.topa.timedelivery.entities.catalog.Type;
 import ru.topa.timedelivery.entities.catalog.TypeDishes;
 
 import java.util.Set;
@@ -15,30 +16,23 @@ public class DishesDTO {
     private int weight;
     private String imageUrl;
     private String ingredient;
-    private boolean isVegan;
-    private boolean isSpicy;
-    private boolean isTop;
-    private boolean isNew;
-    private Set<TypeDishes> typeDishes; // Изменили тип на Set
+    private Set<TypeDishes> typeDishes;
+    private Set<Type> types;
 
 
     public DishesDTO(String name, double price, int weight, String imageUrl, String ingredient,
-                     boolean isVegan, boolean isSpicy, boolean isTop, boolean isNew,
-                     Set<TypeDishes> typeDishes) {
+                     Set<TypeDishes> typeDishes, Set<Type> types) {
         this.name = name;
         this.price = price;
         this.weight = weight;
         this.imageUrl = imageUrl;
         this.ingredient = ingredient;
-        this.isVegan = isVegan;
-        this.isSpicy = isSpicy;
-        this.isTop = isTop;
-        this.isNew = isNew;
         this.typeDishes = typeDishes;
+        this.types = types;
     }
 
     // Метод для преобразования DTO в Entity
     public Dishes toEntity() {
-        return new Dishes(name, price, weight, imageUrl, ingredient, isVegan, isSpicy, isTop, isNew, typeDishes);
+        return new Dishes(name, price, weight, imageUrl, ingredient, typeDishes,types);
     }
 }

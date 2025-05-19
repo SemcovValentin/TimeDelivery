@@ -255,6 +255,7 @@ async function loadAndRenderUserOrders(userOrders) {
 // Функция для рендера таблицы заказов пользователя
 function renderUserOrdersTable(userOrders, allDishes) {
     const container = document.getElementById('userOrdersTableContainer');
+    if (!container) {return;}
     const emptyMessage = document.getElementById('userOrdersEmptyMessage');
 
     if (!userOrders || userOrders.length === 0) {
@@ -383,9 +384,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error('Ошибка при загрузке заказов:', error);
         const container = document.getElementById('userOrdersTableContainer');
-        container.innerHTML = '<p class="text-danger">Не удалось загрузить заказы.</p>';
+        if (container) {
+            container.innerHTML = '<p class="text-danger">Не удалось загрузить заказы.</p>';
+        }
         const emptyMessage = document.getElementById('userOrdersEmptyMessage');
-        emptyMessage.style.display = 'none';
+        if (emptyMessage) {
+            emptyMessage.style.display = 'none';
+        }
     }
 });
 

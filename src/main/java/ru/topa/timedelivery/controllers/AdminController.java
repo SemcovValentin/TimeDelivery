@@ -1,7 +1,6 @@
 package ru.topa.timedelivery.controllers;
 
 
-import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.criteria.Join;
@@ -18,8 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import ru.topa.timedelivery.DTOs.ClientDTO;
+import ru.topa.timedelivery.DTOs.DishesDTO;
 import ru.topa.timedelivery.DTOs.EmployeeDTO;
 import ru.topa.timedelivery.DTOs.RoleDTO;
 import ru.topa.timedelivery.entities.catalog.Dishes;
@@ -28,10 +27,12 @@ import ru.topa.timedelivery.entities.persons.Client;
 import ru.topa.timedelivery.entities.persons.Role;
 import ru.topa.timedelivery.entities.persons.User;
 import ru.topa.timedelivery.repositories.ClientRepository;
+import ru.topa.timedelivery.repositories.DishesRepository;
 import ru.topa.timedelivery.repositories.RoleRepository;
 import ru.topa.timedelivery.repositories.UserRepository;
 import ru.topa.timedelivery.services.DishesService;
 import ru.topa.timedelivery.services.TypeDishesService;
+import ru.topa.timedelivery.services.TypeService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,6 +53,11 @@ public class AdminController {
     RoleRepository roleRepository;
     @Autowired
     private ClientRepository clientRepository;
+    @Autowired
+    private DishesRepository dishesRepository;
+    @Autowired
+    private TypeService typeService;
+
 
     @Value("${default.user.password}")
     private String defaultUserPassword;
@@ -66,6 +72,7 @@ public class AdminController {
     @GetMapping("/addAll")
     @ResponseBody
     public String addAll() {
+        typeService.addAllTypes();
         service.addAllCategories();
         dishesService.addAllDishes();
         return "all dishas is added";
@@ -89,13 +96,10 @@ public class AdminController {
         int weight = (Integer) request.get("weight");
         String imageUrl = (String) request.get("imageUrl");
         String ingredient = (String) request.get("ingredient");
-        boolean isVegan = (Boolean) request.get("isVegan");
-        boolean isSpicy = (Boolean) request.get("isSpicy");
-        boolean isTop = (Boolean) request.get("isTop");
-        boolean isNew = (Boolean) request.get("isNew");
         List<String> categoryNames = (List<String>) request.get("categoryNames");
+        List<String> typsNames = (List<String>) request.get("typsNames");
 
-        return dishesService.createDish(name, price, weight, imageUrl, ingredient, isVegan, isSpicy, isTop, isNew, categoryNames);
+        return dishesService.createDish(name, price, weight, imageUrl, ingredient, categoryNames, typsNames);
     }
 
     @GetMapping("/employees/{id}")
@@ -288,31 +292,6 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
-    /*@GetMapping("/clients")
-    public ResponseEntity<Page<ClientDTO>> getClients(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        Page<User> usersPage = userRepository.findAllByRoles_Name("ROLE_USER", pageable);
-
-        Page<ClientDTO> dtoPage = usersPage.map(user -> {
-            Client client = user.getClient();
-            if (client == null) {
-                ClientDTO dto = new ClientDTO();
-                dto.setPhone(user.getName());
-                dto.setUserId(user.getId());
-                return dto;
-            }
-            ClientDTO dto = ClientDTO.from(client);
-            dto.setPhone(user.getName());
-            dto.setUserId(user.getId());
-            return dto;
-        });
-        return ResponseEntity.ok(dtoPage);
-    }
-*/
-
     @GetMapping("/clients")
     public ResponseEntity<Page<ClientDTO>> getClients(
             @RequestParam(defaultValue = "0") int page,
@@ -368,6 +347,39 @@ public class AdminController {
 
         return ResponseEntity.ok(dtoPage);
     }
+
+    @GetMapping("/dishes")
+    @ResponseBody
+    public Page<DishesDTO> getAllDishes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long categoryId) {
+
+        Page<Dishes> dishesPage;
+
+        if (categoryId != null) {
+            dishesPage = dishesRepository.findByTypeDishes_Id(categoryId, PageRequest.of(page, size));
+        } else {
+            dishesPage = dishesRepository.findAll(PageRequest.of(page, size));
+        }
+
+        return dishesPage.map(this::toDTO);
+    }
+
+    private DishesDTO toDTO(Dishes dish) {
+        DishesDTO dto = new DishesDTO(
+                dish.getName(),
+                dish.getPrice(),
+                dish.getWeight(),
+                dish.getImageUrl(),
+                dish.getIngredient(),
+                dish.getTypeDishes(),
+                dish.getTypes()
+        );
+        dto.setId(dish.getId());
+        return dto;
+    }
+
 
 
 }

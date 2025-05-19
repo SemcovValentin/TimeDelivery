@@ -147,7 +147,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* Правая колонка - таблица заказов */
+/* Правая колонка */
 .flex-grow-1 {
     background-color: #222;
     border-radius: 8px;
@@ -278,7 +278,14 @@ body {
     background-color: #ccc;
 }
 
-/* Адаптивность */
+.custom-card {
+    min-width: 270px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 0 0 200px;
+}
+
+/* Адаптивность для экранов <= 768px */
 @media (max-width: 768px) {
     .container > .d-flex {
         flex-direction: column;
@@ -287,6 +294,7 @@ body {
 
     .custom-card {
         width: 100% !important;
+        max-width: none;
         margin-bottom: 1rem;
     }
 
@@ -297,6 +305,7 @@ body {
     }
 }
 
+
 .flex-grow-1 table {
     font-size: 1.2rem;
 }
@@ -305,3 +314,32 @@ body {
     font-size: 1.20rem;
     font-weight: 600;
 }
+
+/*блюда*/
+#adminContent {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 15px;
+    box-sizing: border-box;
+}
+.card {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.btn-group-responsive {
+    gap: 10px; /* расстояние между кнопками */
+}
+
+@media (max-width: 991.98px) {
+    .btn-group-responsive {
+        flex-direction: column !important; /* кнопки друг под другом */
+        align-items: stretch; /* кнопки растягиваются на всю ширину */
+    }
+    .btn-group-responsive > button {
+        margin: 0 !important; /* убираем внешние отступы */
+        width: 100%; /* кнопки на всю ширину */
+    }
+}
+
+

@@ -43,18 +43,6 @@ public class Dishes {
     @Column(name = "ingredients",columnDefinition = "TEXT",nullable = false)
     private String ingredient;
 
-    @Column(name = "is_vegetarian", nullable = false, columnDefinition = "BIT")
-    private boolean isVegan;
-
-    @Column(name = "is_spicy", nullable = false, columnDefinition = "BIT")
-    private boolean isSpicy;
-
-    @Column(name = "is_top", nullable = false, columnDefinition = "BIT")
-    private boolean isTop;
-
-    @Column(name = "is_new", nullable = false, columnDefinition = "BIT")
-    private boolean isNew;
-
     @OneToMany(mappedBy = "dish")
     @JsonBackReference
     private Set<OrderItem> orderItems;
@@ -67,16 +55,20 @@ public class Dishes {
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<TypeDishes> typeDishes = new HashSet<>();
 
-    public Dishes(String name, double price, int weight, String imageUrl, String ingredient, boolean isVegan, boolean isSpicy, boolean isTop, boolean isNew, Set<TypeDishes> typeDishes) {
+    @ManyToMany
+    @JoinTable(
+            name = "dish_type",
+            joinColumns = @JoinColumn(name = "dish_id"),
+            inverseJoinColumns = @JoinColumn(name = "type_id"))
+    private Set<Type> types;
+
+    public Dishes(String name, double price, int weight, String imageUrl, String ingredient, Set<TypeDishes> typeDishes, Set<Type> types) {
         this.name = name;
         this.price = price;
         this.weight = weight;
         this.imageUrl = imageUrl;
         this.ingredient = ingredient;
-        this.isVegan = isVegan;
-        this.isSpicy = isSpicy;
-        this.isTop = isTop;
-        this.isNew = isNew;
         this.typeDishes = typeDishes;
+        this.types = types;
     }
 }

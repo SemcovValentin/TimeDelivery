@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.topa.timedelivery.entities.catalog.Dishes;
+import ru.topa.timedelivery.entities.catalog.Type;
 import ru.topa.timedelivery.repositories.DishesRepository;
 import ru.topa.timedelivery.services.HomeService;
 import ru.topa.timedelivery.services.TypeDishesService;
+import ru.topa.timedelivery.services.TypeService;
 
 import java.util.List;
 
@@ -21,26 +23,25 @@ public class HomeController {
     TypeDishesService typeDishesService;
     @Autowired
     HomeService homeService;
-
     @Autowired
     DishesRepository dishesRepository;
-
-    @GetMapping("/test")
-    public String test(){
-        return "test";
-    }
-
+    @Autowired
+    TypeService typeService;
 
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("images", homeService.getCarousel());
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "home";
     }
 
     @GetMapping("/search")
     public String search(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "search";
     }
 
@@ -59,42 +60,56 @@ public class HomeController {
     @GetMapping("/catalogs/")
     public String catalog(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "catalog";
     }
     
     @GetMapping("/restaurants")
     public String restaurants(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "restaurants";
     }
 
     @GetMapping("/bonuses")
     public String bonuses(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "bonuses";
     }
 
     @GetMapping("/payment")
     public String payment(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "payment";
     }
 
     @GetMapping("/pickup")
     public String pickup(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "pickup";
     }
 
     @GetMapping("/delivery")
     public String delivery(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "delivery";
     }
 
     @GetMapping("/user")
     public String userPage(Model model) {
         model.addAttribute("categories", typeDishesService.getAllCategories());
+        List<Type> types = typeService.getAllTypes();
+        model.addAttribute("types", types);
         return "user";
     }
 }
