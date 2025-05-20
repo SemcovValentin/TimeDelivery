@@ -29,8 +29,6 @@ async function userIsAuthorized() {
     }
 }
 
-
-
 //////////////////////////////////////////////////////
 // Универсальная функция показа
 function showUniversalToast(title, message, type = 'success') {
@@ -64,10 +62,9 @@ function showAuthRequiredModal() {
 }
 
 /////////////////////////////////////////////////////////
-
+//карусель
 const carouselIndicators = document.getElementById('carouselExampleIndicators');
 if (carouselIndicators) {
-    //карусель
     fetch('/timeDelivery/images')
         .then(response => response.json())
         .then(images => {

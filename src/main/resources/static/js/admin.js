@@ -479,24 +479,59 @@ document.getElementById('btnClients').addEventListener('click', () => {
 
 //////////////////////////////////////////////////////////////////////////
 //работа с блюдами
+let selectedCategoryId = null;
+let selectedTypeId = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     const adminContent = document.getElementById("adminContent");
     let currentPage = 0;
     const pageSize = 6;
     let totalPages = 1;
 
+    window.loadAndRenderDishes = async function(page = 0) {
+            try {
+                let url = `/admin/dishes?page=${page}&size=${pageSize}`;
+                if (selectedCategoryId) {
+                    url += `&categoryId=${selectedCategoryId}`;
+                }
+                if (selectedTypeId) {
+                    url += `&typeId=${selectedTypeId}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Ошибка загрузки блюд');
+                const data = await response.json();
+
+                totalPages = data.totalPages;
+                currentPage = data.number;
+
+                renderCards(data.content);
+                renderPagination();
+            } catch (error) {
+                adminContent.innerHTML = `<div class="alert alert-danger">Ошибка: ${error.message}</div>`;
+            }
+    };
+
+
     // Функция для загрузки и отображения категорий
-    async function renderCategoriesDropdown(buttonsContainer) {
+    window.renderCategoriesDropdown = async function(buttonsContainer) {
         const dropdownMenu = buttonsContainer.querySelector('.btn-group:first-child .dropdown-menu');
         dropdownMenu.innerHTML = '<li><span class="dropdown-item-text text-muted">Загрузка...</span></li>';
         try {
             const response = await fetch('/admin/categories');
             if (!response.ok) throw new Error('Ошибка загрузки категорий');
             const categories = await response.json();
+
             dropdownMenu.innerHTML = '';
+
+            // Добавляем пункт "Все блюда" в начало списка
+            const allLi = document.createElement('li');
+            allLi.innerHTML = `<a class="dropdown-item" href="#" data-category-id="" data-category-name="Все блюда">Все блюда</a>`;
+            dropdownMenu.appendChild(allLi);
+
             categories.forEach(category => {
                 const li = document.createElement('li');
-                li.innerHTML = `<a class="dropdown-item" href="#" data-category-id="${category.id}">${category.name}</a>`;
+                li.innerHTML = `<a class="dropdown-item" href="#" data-category-id="${category.id}" data-category-name="${category.name}">${category.name}</a>`;
                 dropdownMenu.appendChild(li);
             });
         } catch (error) {
@@ -504,62 +539,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Функция для отрисовки кнопок и фильтров
-    // Глобальная переменная для выбранной категории
-    let selectedCategoryId = null;
+    // Функция для загрузки и отображения типов
+    window.renderTypesDropdown = async function(buttonsContainer) {
+        const dropdownMenu = buttonsContainer.querySelector('.btn-group:nth-child(2) .dropdown-menu');
+        dropdownMenu.innerHTML = '<li><span class="dropdown-item-text text-muted">Загрузка...</span></li>';
+        try {
+            const response = await fetch('/admin/types');
+            if (!response.ok) throw new Error('Ошибка загрузки типов');
+            const types = await response.json();
 
-    async function renderButtonsAndFilters() {
-        adminContent.innerHTML = "";
+            dropdownMenu.innerHTML = '';
 
-        // Создаём контейнер с кнопками и фильтрами
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.id = 'buttonsContainer';
-        buttonsContainer.className = 'mb-4 d-flex gap-3';
-        buttonsContainer.innerHTML = `
-      <div class="btn-group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-          Категории
-        </button>
-        <ul class="dropdown-menu"></ul>
-      </div>
-      <div class="btn-group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-          Типы
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">Вегетарианское</a></li>
-          <li><a class="dropdown-item" href="#">Острое</a></li>
-          <li><a class="dropdown-item" href="#">Новинки</a></li>
-          <li><a class="dropdown-item" href="#">Хиты</a></li>
-        </ul>
-      </div>
-      <button type="button" class="btn btn-success" id="btnAddDish">
-        Добавить блюдо
-      </button>
-    `;
-        adminContent.appendChild(buttonsContainer);
+            // Добавляем пункт "Все типы" в начало списка
+            const allLi = document.createElement('li');
+            allLi.innerHTML = `<a class="dropdown-item" href="#" data-type-id="" data-type-name="Все типы">Все типы</a>`;
+            dropdownMenu.appendChild(allLi);
 
-        // Загружаем категории из API и наполняем dropdown меню
-        await renderCategoriesDropdown(buttonsContainer);
+            // Добавляем остальные типы
+            types.forEach(type => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a class="dropdown-item" href="#" data-type-id="${type.id}" data-type-name="${type.name}">${type.name}</a>`;
+                dropdownMenu.appendChild(li);
+            });
+        } catch (error) {
+            dropdownMenu.innerHTML = '<li><span class="dropdown-item-text text-danger">Ошибка загрузки</span></li>';
+            console.error(error);
+        }
+    }
 
-        // Обработчик клика по пунктам меню категорий для фильтрации блюд
-        buttonsContainer.querySelector('.btn-group:first-child .dropdown-menu').addEventListener('click', e => {
-            if (e.target.classList.contains('dropdown-item')) {
-                e.preventDefault();
-                selectedCategoryId = e.target.dataset.categoryId;
-                currentPage = 0;
-                loadAndRenderDishes(currentPage);
+    // Удаляем все старые сообщения с таким текстом
+    function renderNoDishesMessage() {
+        const oldMessages = Array.from(adminContent.querySelectorAll('p'));
+        oldMessages.forEach(p => {
+            if (p.textContent === "Нет блюд для отображения") {
+                p.remove();
             }
         });
 
-        // Обработчик кнопки "Добавить блюдо"
-        buttonsContainer.querySelector('#btnAddDish').addEventListener('click', () => {
-            console.log('Открыть форму добавления блюда');
-            // TODO: открыть модальное окно или форму добавления
-        });
-
-        // Загрузка и отображение блюд без фильтра или с выбранным фильтром
-        loadAndRenderDishes();
+        // Добавляем новое сообщение
+        const empty = document.createElement('p');
+        empty.textContent = "Нет блюд для отображения";
+        empty.classList.add('text-center', 'my-4'); // для стилизации
+        adminContent.appendChild(empty);
     }
 
 
@@ -569,11 +590,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (oldRow) oldRow.remove();
         let oldPagination = adminContent.querySelector('#pagination');
         if (oldPagination) oldPagination.remove();
+        const oldMessages = Array.from(adminContent.querySelectorAll('p'));
+        oldMessages.forEach(p => {
+            if (p.textContent === "Нет блюд для отображения") {
+                p.remove();
+            }
+        });
 
         if (dishes.length === 0) {
-            const empty = document.createElement('p');
-            empty.textContent = "Нет блюд для отображения";
-            adminContent.appendChild(empty);
+            renderNoDishesMessage();
             return;
         }
 
@@ -682,28 +707,6 @@ document.addEventListener("DOMContentLoaded", () => {
         adminContent.appendChild(pagination);
     }
 
-    // Загрузка и рендер блюд
-    async function loadAndRenderDishes(page = 0) {
-        try {
-            let url = `/admin/dishes?page=${page}&size=${pageSize}`;
-            if (selectedCategoryId) {
-                url += `&categoryId=${selectedCategoryId}`;
-            }
-
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Ошибка загрузки блюд');
-            const data = await response.json();
-
-            totalPages = data.totalPages;
-            currentPage = data.number;
-
-            renderCards(data.content);
-            renderPagination();
-        } catch (error) {
-            adminContent.innerHTML = `<div class="alert alert-danger">Ошибка: ${error.message}</div>`;
-        }
-    }
-
     // Навесить вызов на кнопку "Блюда"
     const btnDishes = document.getElementById('btnDishes');
     if (btnDishes) {
@@ -711,6 +714,81 @@ document.addEventListener("DOMContentLoaded", () => {
             renderButtonsAndFilters();
         });
     }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    window.renderButtonsAndFilters = async function() {
+        const adminContent = document.getElementById("adminContent");
+        adminContent.innerHTML = "";
+
+        // Создаём контейнер с кнопками и фильтрами
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.id = 'buttonsContainer';
+        buttonsContainer.className = 'mb-4 d-flex gap-3';
+        buttonsContainer.innerHTML = `
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Категории
+                </button>
+                <ul class="dropdown-menu"></ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Типы
+                </button>
+                <ul class="dropdown-menu"></ul>
+            </div>
+            <button type="button" class="btn btn-success" id="btnAddDish">
+                Добавить блюдо
+            </button>
+        `;
+        adminContent.appendChild(buttonsContainer);
+
+        // Загружаем категории из API и наполняем dropdown меню
+        await window.renderCategoriesDropdown(buttonsContainer);
+        await window.renderTypesDropdown(buttonsContainer);
+
+        function initDropdownHandler(buttonsContainer, groupIndex, onSelect) {
+            const dropdownGroup = buttonsContainer.querySelector(`.btn-group:nth-child(${groupIndex})`);
+            const dropdownBtn = dropdownGroup.querySelector('button.dropdown-toggle');
+            const dropdownMenu = dropdownGroup.querySelector('.dropdown-menu');
+
+            dropdownMenu.addEventListener('click', e => {
+                if (e.target.classList.contains('dropdown-item')) {
+                    e.preventDefault();
+                    onSelect(e.target, dropdownBtn);
+                }
+            });
+        }
+
+        initDropdownHandler(buttonsContainer, 1, (target, btn) => {
+            selectedCategoryId = target.dataset.categoryId || null;
+            btn.textContent = target.dataset.categoryName;
+            currentPage = 0;
+            window.loadAndRenderDishes(currentPage);
+        });
+
+        initDropdownHandler(buttonsContainer, 2, (target, btn) => {
+            selectedTypeId = target.dataset.typeId || null;
+            btn.textContent = target.dataset.typeName;
+            currentPage = 0;
+            window.loadAndRenderDishes(currentPage);
+        });
+
+        // Обработчик кнопки "Добавить блюдо"
+        buttonsContainer.querySelector('#btnAddDish').addEventListener('click', async () => {
+            const categories = await fetchCategories();
+            const types = await fetchTypes();
+
+            renderAddDishForm(categories, types);
+        });
+
+        // Загрузка и отображение блюд без фильтра или с выбранным фильтром
+        window.loadAndRenderDishes();
+    };
+
+    // Начальная загрузка кнопок и блюд
+    window.renderButtonsAndFilters();
 });
 
 //////////////////////////////////////////////////////
@@ -967,6 +1045,179 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+///////////////////////////////////////////////////////
+//Добавление блюда
+function renderAddDishForm(categories = [], types = []) {
+    const adminContent = document.getElementById('adminContent');
+    adminContent.innerHTML = `
+        <h3>Добавить новое блюдо</h3>
+        <form id="addDishForm">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label for="dishName" class="form-label">Название</label>
+      <input type="text" class="form-control" id="dishName" required>
+    </div>
+
+    <div class="col-md-4">
+      <label for="dishPrice" class="form-label">Цена</label>
+      <input type="number" class="form-control" id="dishPrice" required>
+    </div>
+
+    <div class="col-md-4">
+      <label for="dishWeight" class="form-label">Вес (г)</label>
+      <input type="number" class="form-control" id="dishWeight" required>
+    </div>
+
+    <div class="col-md-4">
+      <label for="dishImage" class="form-label">Изображение блюда</label>
+      <input class="form-control" type="file" id="dishImage" accept="image/*" required>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Категория</label>
+      <div class="btn-group w-100">
+        <button type="button" class="btn btn-primary dropdown-toggle w-100" id="categoryDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+          Выберите категорию
+        </button>
+        <ul class="dropdown-menu" id="categoryDropdownMenu">
+          ${categories.map(cat => `<li><a class="dropdown-item" href="#" data-id="${cat.id}">${cat.name}</a></li>`).join('')}
+        </ul>
+      </div>
+      <input type="hidden" id="selectedCategoryId" name="categoryId" required>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Тип</label>
+      <div class="btn-group w-100">
+        <button type="button" class="btn btn-primary dropdown-toggle w-100" id="typeDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+          Выберите тип
+        </button>
+        <ul class="dropdown-menu" id="typeDropdownMenu">
+          ${types.map(type => `<li><a class="dropdown-item" href="#" data-id="${type.id}">${type.name}</a></li>`).join('')}
+        </ul>
+      </div>
+      <input type="hidden" id="selectedTypeId" name="typeId" required>
+    </div>
+
+    <div class="col-12">
+      <label for="dishIngredient" class="form-label">Ингредиенты</label>
+      <textarea class="form-control" id="dishIngredient" rows="3" required></textarea>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <button type="submit" class="btn btn-primary">Добавить</button>
+    <button type="button" id="btnCancelAddDish" class="btn btn-secondary ms-2">Отмена</button>
+  </div>
+</form>
+    `;
+
+    attachDropdownHandlers();
+    attachFormHandlers();
+}
+
+//обработка выбора категорий и типов
+function attachDropdownHandlers() {
+    const categoryDropdownMenu = document.getElementById('categoryDropdownMenu');
+    const categoryDropdownBtn = document.getElementById('categoryDropdownBtn');
+    const selectedCategoryIdInput = document.getElementById('selectedCategoryId');
+
+    categoryDropdownMenu.querySelectorAll('a.dropdown-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.preventDefault();
+            const id = item.dataset.id;
+            const name = item.textContent;
+            selectedCategoryIdInput.value = id;
+            categoryDropdownBtn.textContent = name;
+        });
+    });
+
+    const typeDropdownMenu = document.getElementById('typeDropdownMenu');
+    const typeDropdownBtn = document.getElementById('typeDropdownBtn');
+    const selectedTypeIdInput = document.getElementById('selectedTypeId');
+
+    typeDropdownMenu.querySelectorAll('a.dropdown-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.preventDefault();
+            const id = item.dataset.id;
+            const name = item.textContent;
+            selectedTypeIdInput.value = id;
+            typeDropdownBtn.textContent = name;
+        });
+    });
+}
+
+//обработка формы отправки и отмены
+function attachFormHandlers() {
+    document.getElementById('addDishForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await submitAddDishForm();
+    });
+
+    document.getElementById('btnCancelAddDish').addEventListener('click', () => {
+        // При отмене очищаем форму и загружаем список блюд заново
+        renderButtonsAndFilters();
+    });
+}
+
+//загрузка блюд и категорий из бд
+async function fetchCategories() {
+    try {
+        const response = await fetch('/admin/categories');
+        if (!response.ok) throw new Error('Ошибка загрузки категорий');
+        return await response.json(); // ожидаем массив категорий
+    } catch (error) {
+        console.error('Ошибка при загрузке категорий:', error);
+        return [];
+    }
+}
+
+async function fetchTypes() {
+    try {
+        const response = await fetch('/admin/types');
+        if (!response.ok) throw new Error('Ошибка загрузки типов');
+        return await response.json(); // ожидаем массив типов
+    } catch (error) {
+        console.error('Ошибка при загрузке типов:', error);
+        return [];
+    }
+}
+
+
+
+//Отправка формы для добавления блюда
+async function submitAddDishForm() {
+    const form = document.getElementById('addDishForm');
+    const formData = new FormData();
+
+    formData.append('name', form.dishName.value.trim());
+    formData.append('price', form.dishPrice.value);
+    formData.append('weight', form.dishWeight.value);
+    formData.append('ingredient', form.dishIngredient.value.trim());
+    formData.append('categoryId', form.selectedCategoryId.value);
+    formData.append('typeId', form.selectedTypeId.value);
+
+    const imageFile = form.dishImage.files[0];
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
+
+    try {
+        const response = await fetch('/admin/dishes', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) throw new Error('Ошибка при добавлении блюда');
+
+        alert('Блюдо успешно добавлено!');
+        loadAndRenderDishes(currentPage);
+    } catch (error) {
+        alert('Ошибка: ' + error.message);
+    }
+}
+
 
 
 

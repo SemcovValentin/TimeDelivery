@@ -214,7 +214,6 @@
 </div>
 
 <!--сортировка-->
-<!-- Типы блюд для фильтрации -->
 <div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
     <th:block th:each="type : ${types}">
         <div>
@@ -229,26 +228,6 @@
         </div>
     </th:block>
 </div>
-
-
-<!--<div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
-    <div>
-        <input type="checkbox" class="btn-check" id="btn-check-veg" name="veg" checked autocomplete="off">
-        <label class="btn btn-primary" for="btn-check-veg">Вегетарианское</label>
-    </div>
-    <div>
-        <input type="checkbox" class="btn-check" id="btn-check-spicy" name="spicy" checked autocomplete="off">
-        <label class="btn btn-primary" for="btn-check-spicy">Острое</label>
-    </div>
-    <div>
-        <input type="checkbox" class="btn-check" id="btn-check-new" name="new" checked autocomplete="off">
-        <label class="btn btn-primary" for="btn-check-new">Новинки</label>
-    </div>
-    <div>
-        <input type="checkbox" class="btn-check" id="btn-check-hit" name="hit" autocomplete="off">
-        <label class="btn btn-primary" for="btn-check-hit">Хит</label>
-    </div>
-</div>-->
 
 <div class="container mt-4">
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 filtr-catalog" id="catalog"></div>

@@ -348,7 +348,7 @@ public class AdminController {
         return ResponseEntity.ok(dtoPage);
     }
 
-    @GetMapping("/dishes")
+    /*@GetMapping("/dishes")
     @ResponseBody
     public Page<DishesDTO> getAllDishes(
             @RequestParam(defaultValue = "0") int page,
@@ -364,7 +364,34 @@ public class AdminController {
         }
 
         return dishesPage.map(this::toDTO);
+    }*/
+    @GetMapping("/dishes")
+    @ResponseBody
+    public Page<DishesDTO> getAllDishes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long typeId) {
+
+        Page<Dishes> dishesPage;
+
+        if (categoryId != null && typeId != null) {
+            // Фильтрация и по категории, и по типу
+            dishesPage = dishesRepository.findByTypeDishes_IdAndTypes_Id(categoryId, typeId, PageRequest.of(page, size));
+        } else if (categoryId != null) {
+            // Фильтрация по категории
+            dishesPage = dishesRepository.findByTypeDishes_Id(categoryId, PageRequest.of(page, size));
+        } else if (typeId != null) {
+            // Фильтрация по типу
+            dishesPage = dishesRepository.findByTypes_Id(typeId, PageRequest.of(page, size));
+        } else {
+            // Без фильтрации
+            dishesPage = dishesRepository.findAll(PageRequest.of(page, size));
+        }
+
+        return dishesPage.map(this::toDTO);
     }
+
 
     private DishesDTO toDTO(Dishes dish) {
         DishesDTO dto = new DishesDTO(
