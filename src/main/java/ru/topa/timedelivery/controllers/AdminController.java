@@ -1,41 +1,30 @@
 package ru.topa.timedelivery.controllers;
 
 
-import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.EntityNotFoundException;
+import org.apache.coyote.BadRequestException;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 import ru.topa.timedelivery.DTOs.ClientDTO;
 import ru.topa.timedelivery.DTOs.DishesDTO;
 import ru.topa.timedelivery.DTOs.EmployeeDTO;
 import ru.topa.timedelivery.DTOs.RoleDTO;
 import ru.topa.timedelivery.entities.catalog.Dishes;
 import ru.topa.timedelivery.entities.catalog.TypeDishes;
-import ru.topa.timedelivery.entities.persons.Client;
 import ru.topa.timedelivery.entities.persons.Role;
 import ru.topa.timedelivery.entities.persons.User;
-import ru.topa.timedelivery.repositories.ClientRepository;
-import ru.topa.timedelivery.repositories.DishesRepository;
-import ru.topa.timedelivery.repositories.RoleRepository;
-import ru.topa.timedelivery.repositories.UserRepository;
-import ru.topa.timedelivery.services.DishesService;
-import ru.topa.timedelivery.services.TypeDishesService;
-import ru.topa.timedelivery.services.TypeService;
+import ru.topa.timedelivery.repositories.*;
+import ru.topa.timedelivery.services.*;
 
+import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Controller
@@ -48,19 +37,13 @@ public class AdminController {
     @Autowired
     UserRepository userRepository;
     @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
     RoleRepository roleRepository;
     @Autowired
-    private ClientRepository clientRepository;
-    @Autowired
-    private DishesRepository dishesRepository;
-    @Autowired
     private TypeService typeService;
-
-
-    @Value("${default.user.password}")
-    private String defaultUserPassword;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private RoleService roleService;
 
 
     @GetMapping("/")
@@ -89,18 +72,88 @@ public class AdminController {
         return service.addCategory(body.get("name"));
     }
 
-    @PostMapping("/create/dishes")
-    public Dishes createDish(@RequestBody Map<String, Object> request) {
-        String name = (String) request.get("name");
-        double price = (Double) request.get("price");
-        int weight = (Integer) request.get("weight");
-        String imageUrl = (String) request.get("imageUrl");
-        String ingredient = (String) request.get("ingredient");
-        List<String> categoryNames = (List<String>) request.get("categoryNames");
-        List<String> typsNames = (List<String>) request.get("typsNames");
-
-        return dishesService.createDish(name, price, weight, imageUrl, ingredient, categoryNames, typsNames);
+    @PostMapping(value = "/create/dishes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DishesDTO> createDish(
+            @RequestParam("name") String name,
+            @RequestParam("price") double price,
+            @RequestParam("weight") int weight,
+            @RequestParam("ingredient") String ingredient,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam("typeId") Long typeId,
+            @RequestPart("image") MultipartFile imageFile
+    ) {
+        try {
+            DishesDTO createdDish = dishesService.createDish(name, price, weight, ingredient, categoryId, typeId, imageFile);
+            return ResponseEntity.ok(createdDish);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
+
+    @PutMapping("/dishes/{id}")
+    public ResponseEntity<?> updateDish(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam("price") Double price,
+            @RequestParam("weight") Integer weight,
+            @RequestParam("ingredient") String ingredient,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam("typeId") Long typeId,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+
+        try {
+            DishesDTO updatedDish = dishesService.updateDish(id, name, price, weight, ingredient, categoryId, typeId, imageFile);
+            return ResponseEntity.ok(updatedDish);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Ошибка сервера при обновлении блюда"));
+        }
+    }
+
+
+    /*@PostMapping(value = "/create/dishes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Dishes> createDish(
+            @RequestParam("name") String name,
+            @RequestParam("price") double price,
+            @RequestParam("weight") int weight,
+            @RequestParam("ingredient") String ingredient,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam("typeId") Long typeId,
+            @RequestPart("image") MultipartFile imageFile
+    ) {
+        // 1. Сохраняем изображение на диск и получаем URL
+        String imageUrl = fileStorageService.saveImage(imageFile);
+
+        // 2. Загружаем категории и типы
+        Set<TypeDishes> categories = new HashSet<>();
+        categories.add(typeDishesRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Категория не найдена")));
+
+        Set<Type> types = new HashSet<>();
+        types.add(typeRepository.findById(typeId)
+                .orElseThrow(() -> new IllegalArgumentException("Тип не найден")));
+
+        // 3. Создаём блюдо
+        Dishes dish = new Dishes(name, price, weight, imageUrl, ingredient, categories, types);
+        Dishes saved = dishesRepository.save(dish);
+
+        return ResponseEntity.ok(saved);
+    }*/
+
+    @GetMapping("/dishes/{dishId}")
+    public ResponseEntity<DishesDTO> getDishById(@PathVariable Long dishId) {
+        DishesDTO dish = dishesService.findById(dishId);
+        if (dish == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dish);
+    }
+
 
     @GetMapping("/employees/{id}")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Long id) {
@@ -131,6 +184,21 @@ public class AdminController {
 
     @DeleteMapping("/employees/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        try {
+            userService.deleteEmployee(id);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (UserService.ForbiddenOperationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    /*@DeleteMapping("/employees/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -143,15 +211,32 @@ public class AdminController {
                 .anyMatch(role -> !role.equals("ROLE_ADMIN") && !role.equals("ROLE_USER"));
 
         if (!isEmployee) {
-            // Запрет на удаление, если роль admin или user
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         userRepository.delete(user);
         return ResponseEntity.noContent().build();
-    }
+    }*/
 
     @PostMapping("/employees")
+    public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO dto) {
+        try {
+            userService.addEmployee(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (UserService.DataConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Внутренняя ошибка сервера"));
+        }
+    }
+
+
+    /*@PostMapping("/employees")
     public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO dto) {
 
         if (userRepository.findByName(dto.getPhone()).isPresent()) {
@@ -185,9 +270,7 @@ public class AdminController {
         userRepository.save(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-
+    }*/
 
     @GetMapping("/roles")
     @ResponseBody
@@ -199,6 +282,24 @@ public class AdminController {
     }
 
     @PostMapping("/roles")
+    public ResponseEntity<?> addRole(@RequestBody RoleDTO roleDTO) {
+        try {
+            roleService.addRole(roleDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", e.getMessage()));
+        } catch (RoleService.DataConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Внутренняя ошибка сервера"));
+        }
+    }
+
+
+    /*@PostMapping("/roles")
     public ResponseEntity<?> addRole(@RequestBody RoleDTO roleDTO) {
         String roleName = roleDTO.getName();
 
@@ -216,10 +317,29 @@ public class AdminController {
         roleRepository.save(role);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }*/
+
+    @DeleteMapping("/roles/{id}")
+    public ResponseEntity<?> deleteRole(@PathVariable Long id) {
+        try {
+            roleService.deleteRole(id);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (RoleService.ForbiddenOperationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (UserService.DataConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Внутренняя ошибка сервера"));
+        }
     }
 
 
-    @DeleteMapping("/roles/{id}")
+    /*@DeleteMapping("/roles/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable Long id) {
         Optional<Role> roleOpt = roleRepository.findById(id);
         if (roleOpt.isEmpty()) {
@@ -243,9 +363,26 @@ public class AdminController {
 
         roleRepository.delete(role);
         return ResponseEntity.noContent().build();
-    }
+    }*/
 
     @PutMapping("/employees/{id}")
+    public ResponseEntity<?> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO dto) {
+        try {
+            userService.updateEmployee(id, dto);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (UserService.DataConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Внутренняя ошибка сервера"));
+        }
+    }
+
+
+    /*@PutMapping("/employees/{id}")
     public ResponseEntity<?> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO dto) {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
@@ -290,7 +427,7 @@ public class AdminController {
         userRepository.save(user);
 
         return ResponseEntity.ok().build();
-    }
+    }*/
 
     @GetMapping("/clients")
     public ResponseEntity<Page<ClientDTO>> getClients(
@@ -299,9 +436,20 @@ public class AdminController {
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
+        Page<ClientDTO> clientsPage = userService.getClients(page, size, sortBy, direction);
+        return ResponseEntity.ok(clientsPage);
+    }
+
+    /*@GetMapping("/clients")
+    public ResponseEntity<Page<ClientDTO>> getClients(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
         Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-        Pageable pageable = PageRequest.of(page, size); // сортировку задаём в Specification
+        Pageable pageable = PageRequest.of(page, size);
 
         Specification<User> spec = (root, query, cb) -> {
             Join<User, Role> roles = root.join("roles");
@@ -346,26 +494,20 @@ public class AdminController {
         });
 
         return ResponseEntity.ok(dtoPage);
-    }
+    }*/
 
-    /*@GetMapping("/dishes")
+    @GetMapping("/dishes")
     @ResponseBody
     public Page<DishesDTO> getAllDishes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long categoryId) {
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long typeId) {
 
-        Page<Dishes> dishesPage;
+        return dishesService.getAllDishes(page, size, categoryId, typeId);
+    }
 
-        if (categoryId != null) {
-            dishesPage = dishesRepository.findByTypeDishes_Id(categoryId, PageRequest.of(page, size));
-        } else {
-            dishesPage = dishesRepository.findAll(PageRequest.of(page, size));
-        }
-
-        return dishesPage.map(this::toDTO);
-    }*/
-    @GetMapping("/dishes")
+    /*@GetMapping("/dishes")
     @ResponseBody
     public Page<DishesDTO> getAllDishes(
             @RequestParam(defaultValue = "0") int page,
@@ -376,16 +518,12 @@ public class AdminController {
         Page<Dishes> dishesPage;
 
         if (categoryId != null && typeId != null) {
-            // Фильтрация и по категории, и по типу
             dishesPage = dishesRepository.findByTypeDishes_IdAndTypes_Id(categoryId, typeId, PageRequest.of(page, size));
         } else if (categoryId != null) {
-            // Фильтрация по категории
             dishesPage = dishesRepository.findByTypeDishes_Id(categoryId, PageRequest.of(page, size));
         } else if (typeId != null) {
-            // Фильтрация по типу
             dishesPage = dishesRepository.findByTypes_Id(typeId, PageRequest.of(page, size));
         } else {
-            // Без фильтрации
             dishesPage = dishesRepository.findAll(PageRequest.of(page, size));
         }
 
@@ -405,7 +543,8 @@ public class AdminController {
         );
         dto.setId(dish.getId());
         return dto;
-    }
+    }*/
+
 
 
 

@@ -51,6 +51,7 @@ function showUniversalToast(title, message, type = 'success') {
 
     setTimeout(() => toast.hide(), 5000);
 }
+
 //модальное окно для вызова не зарегистрированным пользователем
 function showAuthRequiredModal() {
     const modalEl = document.getElementById('authRequiredModal');

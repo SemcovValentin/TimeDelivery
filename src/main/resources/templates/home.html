@@ -136,15 +136,17 @@
         </div>
     </div>
 
-    <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="universalToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto toast-title">Успех</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Закрыть"></button>
-            </div>
-            <div class="toast-body">
-                Сообщение успешно отправлено!
-            </div>
+    <div id="universalToast"
+         class="toast align-items-center text-white bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-3"
+         role="alert"
+         aria-live="assertive" aria-atomic="true" style="min-width: 250px; z-index: 1080;">
+        <div class="toast-header bg-success text-white">
+            <strong class="me-auto toast-title">Заголовок</strong>
+            <button type="button" class="btn-close btn-close-white ms-2 mb-1" data-bs-dismiss="toast"
+                    aria-label="Закрыть"></button>
+        </div>
+        <div class="toast-body toast-body">
+            Сообщение
         </div>
     </div>
 

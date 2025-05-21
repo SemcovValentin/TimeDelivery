@@ -57,7 +57,7 @@ async function renderEmployeesTable() {
                         }
                         await renderEmployeesTable();
                     } catch (error) {
-                        alert(error.message);
+                        showUniversalToast('Ошибка',error.message, 'danger');
                     }
                 }
             });
@@ -156,11 +156,11 @@ async function renderAddEmployeeForm() {
                 throw new Error(errorData.message || 'Ошибка при добавлении сотрудника');
             }
 
-            alert('Сотрудник успешно добавлен!');
+            showUniversalToast('Успех','Сотрудник успешно добавлен!', 'success');
             await renderEmployeesTable();
 
         } catch (error) {
-            alert(`Ошибка: ${error.message}`);
+            showUniversalToast('Ошибка',`Ошибка: ${error.message}`, 'danger');
         }
     });
 }
@@ -247,12 +247,11 @@ async function renderAddRoleForm() {
                 throw new Error(errorData.message || 'Ошибка при добавлении роли');
             }
 
-            alert('Роль успешно добавлена!');
-            // Обновляем таблицу ролей, перерисовываем форму
+            showUniversalToast('Успех','Роль успешно добавлена!', 'success');
             await renderAddRoleForm();
 
         } catch (error) {
-            alert(`Ошибка: ${error.message}`);
+            showUniversalToast('Ошибка',`Ошибка: ${error.message}`, 'danger');
         }
     });
 
@@ -269,10 +268,9 @@ async function renderAddRoleForm() {
                     if (!deleteResponse.ok) {
                         throw new Error('Ошибка при удалении роли');
                     }
-                    // После удаления обновляем таблицу и форму
                     await renderAddRoleForm();
                 } catch (error) {
-                    alert(error.message);
+                    showUniversalToast('Ошибка',error.message, 'danger');
                 }
             }
         });
@@ -359,11 +357,11 @@ async function renderEditEmployeeForm(userId) {
                     throw new Error(errorData.message || 'Ошибка при обновлении сотрудника');
                 }
 
-                alert('Сотрудник успешно обновлён!');
+                showUniversalToast('Успех','Сотрудник успешно обновлён!', 'success');
                 await renderEmployeesTable();
 
             } catch (error) {
-                alert(`Ошибка: ${error.message}`);
+                showUniversalToast('Ошибка',`Ошибка: ${error.message}`, 'danger' );
             }
         });
 
@@ -524,7 +522,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             dropdownMenu.innerHTML = '';
 
-            // Добавляем пункт "Все блюда" в начало списка
             const allLi = document.createElement('li');
             allLi.innerHTML = `<a class="dropdown-item" href="#" data-category-id="" data-category-name="Все блюда">Все блюда</a>`;
             dropdownMenu.appendChild(allLi);
@@ -638,14 +635,106 @@ document.addEventListener("DOMContentLoaded", () => {
 
         adminContent.appendChild(row);
 
-        // Навесить обработчики кнопок
-        adminContent.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', e => {
+
+
+
+
+
+        // Кнопка редактирования блюда
+       /* adminContent.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', async e => {
                 const dishId = e.currentTarget.getAttribute('data-dish-id');
                 console.log('Редактировать блюдо с id:', dishId);
+
+                try {
+                    const response = await fetch(`/admin/dishes/${dishId}`);
+                    if (!response.ok) throw new Error('Ошибка загрузки данных блюда');
+                    const dish = await response.json();
+
+                    // Открываем вкладку добавления блюда (если она скрыта)
+                    openAddDishTab();
+
+                    // Заполняем форму данными блюда
+                    fillAddDishForm(dish);
+
+                    // Меняем заголовок и кнопку на "Редактировать"
+                    document.getElementById('formTitle').textContent = 'Редактирование блюда';
+                    const submitBtn = document.getElementById('submitAddDishBtn');
+                    submitBtn.textContent = 'Сохранить изменения';
+
+                    // Сохраняем id блюда в скрытом поле формы
+                    document.getElementById('dishId').value = dish.id;
+
+                } catch (error) {
+                    showUniversalToast('Ошибка', 'Не удалось загрузить данные блюда: ' + error.message, 'danger');
+                }
             });
         });
 
+        function fillAddDishForm(dish) {
+            const form = document.getElementById('addDishForm');
+            if (!form) {
+                console.error('Форма addDishForm не найдена в DOM');
+                return;
+            }
+
+            // Используйте правильные имена полей (name или id) в зависимости от вашей формы
+            form.elements['name'].value = dish.name;
+            form.elements['price'].value = dish.price;
+            form.elements['weight'].value = dish.weight;
+
+            // Если у вас нет поля с name="imageUrl", уберите или адаптируйте эту строку
+            const imageUrlInput = form.elements['imageUrl'];
+            if (imageUrlInput) {
+                imageUrlInput.value = dish.imageUrl;
+            }
+
+            form.elements['ingredient'].value = dish.ingredient;
+
+            // Заполните категории и типы (пример)
+            if (dish.typeDishes && dish.typeDishes.length > 0) {
+                document.getElementById('selectedCategoryId').value = dish.typeDishes[0].id;
+                document.getElementById('categoryDropdownBtn').textContent = dish.typeDishes[0].name;
+            }
+            if (dish.types && dish.types.length > 0) {
+                document.getElementById('selectedTypeId').value = dish.types[0].id;
+                document.getElementById('typeDropdownBtn').textContent = dish.types[0].name;
+            }
+        }*/
+        adminContent.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', async e => {
+                const dishId = e.currentTarget.getAttribute('data-dish-id');
+                console.log('Редактировать блюдо с id:', dishId);
+
+                try {
+                    // Параллельно загружаем блюдо, категории и типы
+                    const [dishResponse, categories, types] = await Promise.all([
+                        fetch(`/admin/dishes/${dishId}`),
+                        fetchCategories(),
+                        fetchTypes()
+                    ]);
+
+                    if (!dishResponse.ok) throw new Error('Ошибка загрузки данных блюда');
+                    const dish = await dishResponse.json();
+
+                    // Рендерим форму с переданными данными для редактирования
+                    renderAddDishForm(categories, types, dish);
+
+                    // Обработчики навешиваются внутри renderAddDishForm
+
+                } catch (error) {
+                    showUniversalToast('Ошибка', 'Не удалось загрузить данные блюда: ' + error.message, 'danger');
+                }
+            });
+        });
+
+
+
+
+
+
+
+        //Кнопка удаления блюда
         adminContent.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', e => {
                 const dishId = e.currentTarget.getAttribute('data-dish-id');
@@ -783,11 +872,8 @@ document.addEventListener("DOMContentLoaded", () => {
             renderAddDishForm(categories, types);
         });
 
-        // Загрузка и отображение блюд без фильтра или с выбранным фильтром
         window.loadAndRenderDishes();
     };
-
-    // Начальная загрузка кнопок и блюд
     window.renderButtonsAndFilters();
 });
 
@@ -856,7 +942,7 @@ async function renderCategoriesManagement() {
         e.preventDefault();
         const categoryNameInput = document.getElementById('categoryName');
         const name = categoryNameInput.value.trim();
-        if (!name) return alert('Введите название категории');
+        if (!name) return showUniversalToast('Введите название категории', 'danger');
 
         try {
             const response = await fetch('/admin/categories', {
@@ -867,7 +953,7 @@ async function renderCategoriesManagement() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                alert(errorData.message || 'Ошибка при добавлении категории');
+                showUniversalToast(errorData.message || 'Ошибка при добавлении категории', 'danger');
                 return;
             }
 
@@ -875,7 +961,7 @@ async function renderCategoriesManagement() {
             renderCategoriesManagement();
 
         } catch (error) {
-            alert('Ошибка сети: ' + error.message);
+            showUniversalToast('Ошибка сети: ' + error.message, 'danger');
         }
     });
 
@@ -898,13 +984,13 @@ async function renderCategoriesManagement() {
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
-                    alert(errorData.message || 'Ошибка при удалении категории');
+                    showUniversalToast(errorData.message || 'Ошибка при удалении категории', 'danger');
                     return;
                 }
                 // Успешно удалено - обновляем список
                 renderCategoriesManagement();
             } catch (error) {
-                alert('Ошибка сети: ' + error.message);
+                showUniversalToast('Ошибка сети: ' + error.message, 'danger');
             }
         });
     });
@@ -983,7 +1069,7 @@ async function renderTypesManagement() {
         e.preventDefault();
         const typeNameInput = document.getElementById('typeName');
         const name = typeNameInput.value.trim();
-        if (!name) return alert('Введите название типа');
+        if (!name) return showUniversalToast('Введите название типа', 'danger');
 
         try {
             const response = await fetch('/admin/types', {
@@ -994,7 +1080,7 @@ async function renderTypesManagement() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                alert(errorData.message || 'Ошибка при добавлении типа');
+                showUniversalToast(errorData.message || 'Ошибка при добавлении типа', 'danger');
                 return;
             }
 
@@ -1002,7 +1088,7 @@ async function renderTypesManagement() {
             renderTypesManagement();
 
         } catch (error) {
-            alert('Ошибка сети: ' + error.message);
+            showUniversalToast('Ошибка','Ошибка сети: ' + error.message, 'danger');
         }
     });
 
@@ -1025,13 +1111,13 @@ async function renderTypesManagement() {
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
-                    alert(errorData.message || 'Ошибка при удалении типа');
+                    showUniversalToast(errorData.message || 'Ошибка при удалении типа', 'danger');
                     return;
                 }
                 // Успешно удалено - обновляем список
                 renderTypesManagement();
             } catch (error) {
-                alert('Ошибка сети: ' + error.message);
+                showUniversalToast('Ошибка','Ошибка сети: ' + error.message, 'danger');
             }
         });
     });
@@ -1048,73 +1134,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ///////////////////////////////////////////////////////
 //Добавление блюда
-function renderAddDishForm(categories = [], types = []) {
+function renderAddDishForm(categories = [], types = [], dish = null) {
     const adminContent = document.getElementById('adminContent');
     adminContent.innerHTML = `
-        <h3>Добавить новое блюдо</h3>
+        <h3 id="formTitle">${dish ? 'Редактирование блюда' : 'Добавить новое блюдо'}</h3>
         <form id="addDishForm">
-  <div class="row g-3">
-    <div class="col-md-4">
-      <label for="dishName" class="form-label">Название</label>
-      <input type="text" class="form-control" id="dishName" required>
-    </div>
+          <input type="hidden" id="dishId" name="dishId" value="${dish ? dish.id : ''}">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="dishName" class="form-label">Название</label>
+              <input type="text" class="form-control" id="dishName" name="name" required value="${dish ? dish.name : ''}">
+            </div>
+            <div class="col-md-4">
+              <label for="dishPrice" class="form-label">Цена</label>
+              <input type="number" class="form-control" id="dishPrice" name="price" required value="${dish ? dish.price : ''}">
+            </div>
+            <div class="col-md-4">
+              <label for="dishWeight" class="form-label">Вес (г)</label>
+              <input type="number" class="form-control" id="dishWeight" name="weight" required value="${dish ? dish.weight : ''}">
+            </div>
+            <div class="col-md-4">
+              <label for="dishImage" class="form-label">Изображение блюда</label>
+              <input class="form-control" type="file" id="dishImage" name="image" accept="image/*" ${dish ? '' : 'required'}>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Категория</label>
+              <div class="btn-group w-100">
+                <button type="button" class="btn btn-primary dropdown-toggle w-100" id="categoryDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                  ${dish ? (categories.find(c => c.id === dish.categoryId)?.name || 'Выберите категорию') : 'Выберите категорию'}
+                </button>
+                <ul class="dropdown-menu" id="categoryDropdownMenu">
+                  ${categories.map(cat => `<li><a class="dropdown-item" href="#" data-id="${cat.id}">${cat.name}</a></li>`).join('')}
+                </ul>
+              </div>
+              <input type="hidden" id="selectedCategoryId" name="categoryId" required value="${dish && dish.typeDishes && dish.typeDishes.length > 0 ? dish.typeDishes[0].id : ''}">
 
-    <div class="col-md-4">
-      <label for="dishPrice" class="form-label">Цена</label>
-      <input type="number" class="form-control" id="dishPrice" required>
-    </div>
-
-    <div class="col-md-4">
-      <label for="dishWeight" class="form-label">Вес (г)</label>
-      <input type="number" class="form-control" id="dishWeight" required>
-    </div>
-
-    <div class="col-md-4">
-      <label for="dishImage" class="form-label">Изображение блюда</label>
-      <input class="form-control" type="file" id="dishImage" accept="image/*" required>
-    </div>
-
-    <div class="col-md-4">
-      <label class="form-label">Категория</label>
-      <div class="btn-group w-100">
-        <button type="button" class="btn btn-primary dropdown-toggle w-100" id="categoryDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-          Выберите категорию
-        </button>
-        <ul class="dropdown-menu" id="categoryDropdownMenu">
-          ${categories.map(cat => `<li><a class="dropdown-item" href="#" data-id="${cat.id}">${cat.name}</a></li>`).join('')}
-        </ul>
-      </div>
-      <input type="hidden" id="selectedCategoryId" name="categoryId" required>
-    </div>
-
-    <div class="col-md-4">
-      <label class="form-label">Тип</label>
-      <div class="btn-group w-100">
-        <button type="button" class="btn btn-primary dropdown-toggle w-100" id="typeDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-          Выберите тип
-        </button>
-        <ul class="dropdown-menu" id="typeDropdownMenu">
-          ${types.map(type => `<li><a class="dropdown-item" href="#" data-id="${type.id}">${type.name}</a></li>`).join('')}
-        </ul>
-      </div>
-      <input type="hidden" id="selectedTypeId" name="typeId" required>
-    </div>
-
-    <div class="col-12">
-      <label for="dishIngredient" class="form-label">Ингредиенты</label>
-      <textarea class="form-control" id="dishIngredient" rows="3" required></textarea>
-    </div>
-  </div>
-
-  <div class="mt-3">
-    <button type="submit" class="btn btn-primary">Добавить</button>
-    <button type="button" id="btnCancelAddDish" class="btn btn-secondary ms-2">Отмена</button>
-  </div>
-</form>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Тип</label>
+              <div class="btn-group w-100">
+                <button type="button" class="btn btn-primary dropdown-toggle w-100" id="typeDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                  ${dish ? (types.find(t => t.id === dish.typeId)?.name || 'Выберите тип') : 'Выберите тип'}
+                </button>
+                <ul class="dropdown-menu" id="typeDropdownMenu">
+                  ${types.map(type => `<li><a class="dropdown-item" href="#" data-id="${type.id}">${type.name}</a></li>`).join('')}
+                </ul>
+              </div>
+              <input type="hidden" id="selectedTypeId" name="typeId" required value="${dish && dish.types && dish.types.length > 0 ? dish.types[0].id : ''}">
+            </div>
+            <div class="col-12">
+              <label for="dishIngredient" class="form-label">Ингредиенты</label>
+              <textarea class="form-control" id="dishIngredient" name="ingredient" rows="3" required>${dish ? dish.ingredient : ''}</textarea>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" id="submitAddDishBtn" class="btn btn-primary">${dish ? 'Сохранить изменения' : 'Добавить'}</button>
+            <button type="button" id="btnCancelAddDish" class="btn btn-secondary ms-2">Отмена</button>
+          </div>
+        </form>
     `;
 
     attachDropdownHandlers();
-    attachFormHandlers();
+
+    const form = document.getElementById('addDishForm');
+    if (form) {
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const dishId = form.elements['dishId']?.value;
+            let success = false;
+            if (dishId) {
+                success = await submitEditDishForm(dishId);
+            } else {
+                success = await submitAddDishForm();
+            }
+            if (success) {
+                await renderButtonsAndFilters();
+            }
+        });
+    } else {
+        console.warn('Форма addDishForm не найдена');
+    }
+
+    const btnCancel = document.getElementById('btnCancelAddDish');
+    if (btnCancel) {
+        btnCancel.addEventListener('click', () => {
+            renderButtonsAndFilters();
+        });
+    }
 }
 
 //обработка выбора категорий и типов
@@ -1148,27 +1254,43 @@ function attachDropdownHandlers() {
     });
 }
 
-//обработка формы отправки и отмены
+/*//обработка формы отправки и отмены
 function attachFormHandlers() {
     document.getElementById('addDishForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await submitAddDishForm();
+        const price = parseFloat(document.getElementById('dishPrice').value);
+        const weight = parseInt(document.getElementById('dishWeight').value, 10);
+
+        if (isNaN(price) || price < 0) {
+            showUniversalToast('Ошибка', 'Цена должна быть 0 или больше.', 'danger');
+            return;
+        }
+        if (isNaN(weight) || weight <= 0) {
+            showUniversalToast('Ошибка', 'Вес должен быть больше 0.', 'danger');
+            return;
+        }
+        const success = await submitAddDishForm();
+        if (success) {
+            resetAddDishForm();
+            openDishesListTab();
+            renderButtonsAndFilters();
+        }
     });
 
     document.getElementById('btnCancelAddDish').addEventListener('click', () => {
-        // При отмене очищаем форму и загружаем список блюд заново
         renderButtonsAndFilters();
     });
-}
+}*/
 
 //загрузка блюд и категорий из бд
 async function fetchCategories() {
     try {
         const response = await fetch('/admin/categories');
         if (!response.ok) throw new Error('Ошибка загрузки категорий');
-        return await response.json(); // ожидаем массив категорий
+        return await response.json();
     } catch (error) {
         console.error('Ошибка при загрузке категорий:', error);
+        showUniversalToast('Ошибка', 'Не удалось загрузить категории: ' + error.message, 'danger');
         return [];
     }
 }
@@ -1177,14 +1299,13 @@ async function fetchTypes() {
     try {
         const response = await fetch('/admin/types');
         if (!response.ok) throw new Error('Ошибка загрузки типов');
-        return await response.json(); // ожидаем массив типов
+        return await response.json();
     } catch (error) {
         console.error('Ошибка при загрузке типов:', error);
+        showUniversalToast('Ошибка', 'Не удалось загрузить типы: ' + error.message, 'danger');
         return [];
     }
 }
-
-
 
 //Отправка формы для добавления блюда
 async function submitAddDishForm() {
@@ -1204,19 +1325,104 @@ async function submitAddDishForm() {
     }
 
     try {
-        const response = await fetch('/admin/dishes', {
+        const response = await fetch('/admin/create/dishes', {
             method: 'POST',
             body: formData
         });
 
-        if (!response.ok) throw new Error('Ошибка при добавлении блюда');
+        if (!response.ok) {
+            const errorData = await response.json();
+            if (response.status === 409 && errorData.error) {
+                showUniversalToast(errorData.error, 'danger');
+            } else {
+                showUniversalToast('Ошибка','Ошибка при добавлении блюда: ' + (errorData.error || response.statusText), 'danger');
+            }
+            return false;
+        }
 
-        alert('Блюдо успешно добавлено!');
-        loadAndRenderDishes(currentPage);
+        showUniversalToast('Успех', 'Блюдо успешно добавлено!', 'success');
+        return true;
     } catch (error) {
-        alert('Ошибка: ' + error.message);
+        showUniversalToast('Ошибка', 'Ошибка сети: ' + error.message, 'danger');
+        return false;
     }
 }
+//Редактирование блюд
+
+async function submitEditDishForm(dishId) {
+    const form = document.getElementById('addDishForm');
+    if (!form) {
+        showUniversalToast('Ошибка', 'Форма не найдена', 'danger');
+        return false;
+    }
+
+    const formData = new FormData();
+
+    formData.append('name', form.dishName.value.trim());
+    formData.append('price', form.dishPrice.value);
+    formData.append('weight', form.dishWeight.value);
+    formData.append('ingredient', form.dishIngredient.value.trim());
+    formData.append('categoryId', form.selectedCategoryId.value);
+    formData.append('typeId', form.selectedTypeId.value);
+
+    const imageFile = form.dishImage.files[0];
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
+
+    try {
+        const response = await fetch(`/admin/dishes/${dishId}`, {
+            method: 'PUT',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            if (response.status === 409 && errorData.error) {
+                showUniversalToast(errorData.error, 'danger');
+            } else {
+                showUniversalToast('Ошибка', 'Ошибка при обновлении блюда: ' + (errorData.error || response.statusText), 'danger');
+            }
+            return false;
+        }
+
+        showUniversalToast('Успех', 'Блюдо успешно обновлено!', 'success');
+        return true;
+    } catch (error) {
+        showUniversalToast('Ошибка', 'Ошибка сети: ' + error.message, 'danger');
+        return false;
+    }
+}
+
+/*async function editDish(dishId) {
+    try {
+        const [dishResponse, categories, types] = await Promise.all([
+            fetch(`/admin/dishes/${dishId}`),
+            fetchCategories(),
+            fetchTypes()
+        ]);
+        if (!dishResponse.ok) throw new Error('Ошибка загрузки блюда');
+        const dish = await dishResponse.json();
+        renderAddDishForm(categories, types, dish);
+    } catch (error) {
+        showUniversalToast('Ошибка', 'Не удалось загрузить данные блюда: ' + error.message, 'danger');
+    }
+}
+
+async function resetAddDishForm() {
+    const categories = await fetchCategories();
+    const types = await fetchTypes();
+    renderAddDishForm(categories, types);
+}
+
+
+async function openDishesListTab() {
+    await renderButtonsAndFilters();
+}*/
+
+
+
+
 
 
 

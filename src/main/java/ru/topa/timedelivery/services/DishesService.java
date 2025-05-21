@@ -1,8 +1,10 @@
 package ru.topa.timedelivery.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import ru.topa.timedelivery.DTOs.DishesDTO;
 import ru.topa.timedelivery.entities.catalog.Dishes;
 import ru.topa.timedelivery.entities.catalog.Type;
@@ -11,6 +13,11 @@ import ru.topa.timedelivery.repositories.DishesRepository;
 import ru.topa.timedelivery.repositories.TypeDishesRepository;
 import ru.topa.timedelivery.repositories.TypeRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +33,66 @@ public class DishesService {
     TypeDishesRepository typeDishesRepository;
     @Autowired
     TypeRepository typeRepository;
+    @Autowired
+    FileStorageService fileStorageService;
+
+    public DishesDTO createDish(String name, double price, int weight, String ingredient,
+                                Long categoryId, Long typeId, MultipartFile imageFile) {
+
+        String imageUrl = fileStorageService.saveImage(imageFile);
+
+        TypeDishes category = typeDishesRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
+
+        Type type = typeRepository.findById(typeId)
+                .orElseThrow(() -> new IllegalArgumentException("Тип не найден"));
+
+        Set<TypeDishes> categories = Set.of(category);
+        Set<Type> types = Set.of(type);
+
+        Dishes dish = new Dishes(name, price, weight, imageUrl, ingredient, categories, types);
+        Dishes saved = dishesRepository.save(dish);
+
+        return toDTO(saved);
+    }
+
+    public DishesDTO updateDish(Long id,
+                                String name,
+                                double price,
+                                int weight,
+                                String ingredient,
+                                Long categoryId,
+                                Long typeId,
+                                MultipartFile imageFile) throws Exception {
+
+        Dishes dish = dishesRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Блюдо не найдено"));
+
+        dish.setName(name);
+        dish.setPrice(price);
+        dish.setWeight(weight);
+        dish.setIngredient(ingredient);
+
+        // Обработка категории
+        TypeDishes category = typeDishesRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
+        dish.setTypeDishes(Set.of(category));
+
+        // Обработка типа
+        Type type = typeRepository.findById(typeId)
+                .orElseThrow(() -> new IllegalArgumentException("Тип не найден"));
+        dish.setTypes(Set.of(type));
+
+        // Обработка изображения
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imageUrl = fileStorageService.saveImage(imageFile);
+            dish.setImageUrl(imageUrl);
+        }
+
+        Dishes saved = dishesRepository.save(dish);
+
+        return toDTO(saved);
+    }
 
     public Set<TypeDishes> loadCategories(List<String> categoryNames) {
         Set<TypeDishes> categories = new HashSet<>();
@@ -49,8 +116,48 @@ public class DishesService {
                 .collect(Collectors.toSet());
     }
 
+    public DishesDTO findById(Long dishId) {
+        return dishesRepository.findById(dishId)
+                .map(this::toDTO)
+                .orElse(null);
+    }
 
-    @Transactional
+    private DishesDTO toDTO(Dishes dish) {
+        DishesDTO dto = new DishesDTO(
+                dish.getName(),
+                dish.getPrice(),
+                dish.getWeight(),
+                dish.getImageUrl(),
+                dish.getIngredient(),
+                dish.getTypeDishes(),
+                dish.getTypes()
+        );
+        dto.setId(dish.getId());
+        return dto;
+    }
+
+    public Page<DishesDTO> getAllDishes(int page, int size, Long categoryId, Long typeId) {
+        Page<Dishes> dishesPage;
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (categoryId != null && typeId != null) {
+            dishesPage = dishesRepository.findByTypeDishes_IdAndTypes_Id(categoryId, typeId, pageable);
+        } else if (categoryId != null) {
+            dishesPage = dishesRepository.findByTypeDishes_Id(categoryId, pageable);
+        } else if (typeId != null) {
+            dishesPage = dishesRepository.findByTypes_Id(typeId, pageable);
+        } else {
+            dishesPage = dishesRepository.findAll(pageable);
+        }
+
+        return dishesPage.map(this::toDTO);
+    }
+
+
+
+
+   /* @Transactional
     public Dishes createDish(String name, double price, int weight, String imageUrl, String ingredient,
                              List<String> categoryNames, List<String> typeNames) {
 
@@ -59,12 +166,9 @@ public class DishesService {
 
         Dishes dish = new Dishes(name, price, weight, imageUrl, ingredient, categories, types);
         return dishesRepository.save(dish);
-    }
+    }*/
 
-    public Dishes createDishFromDTO(DishesDTO dishesDTO) {
-        Dishes dishes = dishesDTO.toEntity();
-        return dishesRepository.save(dishes);
-    }
+
 
 
     public void addAllDishes() {
