@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.topa.timedelivery.DTOs.DishesDTO;
+import ru.topa.timedelivery.entities.catalog.DeletedDishes;
 import ru.topa.timedelivery.entities.catalog.Dishes;
 import ru.topa.timedelivery.entities.catalog.Type;
 import ru.topa.timedelivery.entities.catalog.TypeDishes;
+import ru.topa.timedelivery.repositories.DeletedDishesRepository;
 import ru.topa.timedelivery.repositories.DishesRepository;
 import ru.topa.timedelivery.repositories.TypeDishesRepository;
 import ru.topa.timedelivery.repositories.TypeRepository;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +38,8 @@ public class DishesService {
     TypeRepository typeRepository;
     @Autowired
     FileStorageService fileStorageService;
+    @Autowired
+    DeletedDishesRepository deletedDishesRepository;
 
     public DishesDTO createDish(String name, double price, int weight, String ingredient,
                                 Long categoryId, Long typeId, MultipartFile imageFile) {
@@ -64,34 +69,35 @@ public class DishesService {
                                 Long categoryId,
                                 Long typeId,
                                 MultipartFile imageFile) throws Exception {
+        try {
+            Dishes dish = dishesRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Блюдо не найдено"));
 
-        Dishes dish = dishesRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Блюдо не найдено"));
+            dish.setName(name);
+            dish.setPrice(price);
+            dish.setWeight(weight);
+            dish.setIngredient(ingredient);
 
-        dish.setName(name);
-        dish.setPrice(price);
-        dish.setWeight(weight);
-        dish.setIngredient(ingredient);
+            TypeDishes category = typeDishesRepository.findById(categoryId)
+                    .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
+            dish.setTypeDishes(new HashSet<>(Set.of(category)));
 
-        // Обработка категории
-        TypeDishes category = typeDishesRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
-        dish.setTypeDishes(Set.of(category));
+            Type type = typeRepository.findById(typeId)
+                    .orElseThrow(() -> new IllegalArgumentException("Тип не найден"));
+            dish.setTypes(new HashSet<>(Set.of(type)));
 
-        // Обработка типа
-        Type type = typeRepository.findById(typeId)
-                .orElseThrow(() -> new IllegalArgumentException("Тип не найден"));
-        dish.setTypes(Set.of(type));
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String imageUrl = fileStorageService.saveImage(imageFile);
+                dish.setImageUrl(imageUrl);
+            }
 
-        // Обработка изображения
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String imageUrl = fileStorageService.saveImage(imageFile);
-            dish.setImageUrl(imageUrl);
+            Dishes saved = dishesRepository.save(dish);
+            return toDTO(saved);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-
-        Dishes saved = dishesRepository.save(dish);
-
-        return toDTO(saved);
     }
 
     public Set<TypeDishes> loadCategories(List<String> categoryNames) {
@@ -135,6 +141,20 @@ public class DishesService {
         dto.setId(dish.getId());
         return dto;
     }
+    public DishesDTO toDTOFromDeleted(DeletedDishes dish) {
+        DishesDTO dto = new DishesDTO(
+                dish.getName(),
+                dish.getPrice(),
+                dish.getWeight(),
+                dish.getImageUrl(),
+                dish.getIngredient(),
+                dish.getTypeDishes(),
+                dish.getTypes()
+        );
+        dto.setId(dish.getId());
+        return dto;
+    }
+
 
     public Page<DishesDTO> getAllDishes(int page, int size, Long categoryId, Long typeId) {
         Page<Dishes> dishesPage;
@@ -153,6 +173,57 @@ public class DishesService {
 
         return dishesPage.map(this::toDTO);
     }
+
+
+    @Transactional
+    public void deleteDish(Long dishId) {
+        Dishes dish = dishesRepository.findById(dishId)
+                .orElseThrow(() -> new EntityNotFoundException("Блюдо не найдено"));
+
+        DeletedDishes deletedDish = new DeletedDishes();
+        deletedDish.setName(dish.getName());
+        deletedDish.setPrice(dish.getPrice());
+        deletedDish.setWeight(dish.getWeight());
+        deletedDish.setImageUrl(dish.getImageUrl());
+        deletedDish.setIngredient(dish.getIngredient());
+        deletedDish.setTypeDishes(new HashSet<>(dish.getTypeDishes()));
+        deletedDish.setTypes(new HashSet<>(dish.getTypes()));
+        deletedDish.setDeletedAt(LocalDateTime.now());
+
+        deletedDishesRepository.save(deletedDish);
+        dishesRepository.delete(dish);
+    }
+
+    @Transactional
+    public DishesDTO restoreDish(Long deletedDishId) {
+        DeletedDishes deletedDish = deletedDishesRepository.findById(deletedDishId)
+                .orElseThrow(() -> new EntityNotFoundException("Удалённое блюдо не найдено"));
+
+        // Создаём новое блюдо на основе данных из DeletedDishes
+        Dishes dish = new Dishes();
+        dish.setName(deletedDish.getName());
+        dish.setPrice(deletedDish.getPrice());
+        dish.setWeight(deletedDish.getWeight());
+        dish.setImageUrl(deletedDish.getImageUrl());
+        dish.setIngredient(deletedDish.getIngredient());
+        dish.setTypeDishes(new HashSet<>(deletedDish.getTypeDishes()));
+        dish.setTypes(new HashSet<>(deletedDish.getTypes()));
+
+        Dishes savedDish = dishesRepository.save(dish);
+        deletedDishesRepository.delete(deletedDish);
+
+        return toDTO(savedDish);
+    }
+
+    public void deleteById(Long id) {
+        if (!deletedDishesRepository.existsById(id)) {
+            throw new EntityNotFoundException("Удалённое блюдо с id " + id + " не найдено");
+        }
+        deletedDishesRepository.deleteById(id);
+    }
+
+
+
 
 
 

@@ -40,7 +40,7 @@ public class User implements UserDetails {
     @Column(name = "create_at")
     private LocalDateTime createdAt;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Client client;
 

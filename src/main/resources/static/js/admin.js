@@ -370,7 +370,12 @@ async function renderEditEmployeeForm(userId) {
     }
 }
 
-document.getElementById('btnEmployees').addEventListener('click', renderEmployeesTable);
+const btnEmployees = document.getElementById('btnEmployees');
+if (btnEmployees) {
+    btnEmployees.addEventListener('click', renderEmployeesTable);
+} else {
+    console.warn('Кнопка btnEmployees не найдена в DOM');
+}
 
 ////////////////////////////////////////////////////////
 //работа с клиентами
@@ -635,72 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         adminContent.appendChild(row);
 
-
-
-
-
-
         // Кнопка редактирования блюда
-       /* adminContent.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', async e => {
-                const dishId = e.currentTarget.getAttribute('data-dish-id');
-                console.log('Редактировать блюдо с id:', dishId);
-
-                try {
-                    const response = await fetch(`/admin/dishes/${dishId}`);
-                    if (!response.ok) throw new Error('Ошибка загрузки данных блюда');
-                    const dish = await response.json();
-
-                    // Открываем вкладку добавления блюда (если она скрыта)
-                    openAddDishTab();
-
-                    // Заполняем форму данными блюда
-                    fillAddDishForm(dish);
-
-                    // Меняем заголовок и кнопку на "Редактировать"
-                    document.getElementById('formTitle').textContent = 'Редактирование блюда';
-                    const submitBtn = document.getElementById('submitAddDishBtn');
-                    submitBtn.textContent = 'Сохранить изменения';
-
-                    // Сохраняем id блюда в скрытом поле формы
-                    document.getElementById('dishId').value = dish.id;
-
-                } catch (error) {
-                    showUniversalToast('Ошибка', 'Не удалось загрузить данные блюда: ' + error.message, 'danger');
-                }
-            });
-        });
-
-        function fillAddDishForm(dish) {
-            const form = document.getElementById('addDishForm');
-            if (!form) {
-                console.error('Форма addDishForm не найдена в DOM');
-                return;
-            }
-
-            // Используйте правильные имена полей (name или id) в зависимости от вашей формы
-            form.elements['name'].value = dish.name;
-            form.elements['price'].value = dish.price;
-            form.elements['weight'].value = dish.weight;
-
-            // Если у вас нет поля с name="imageUrl", уберите или адаптируйте эту строку
-            const imageUrlInput = form.elements['imageUrl'];
-            if (imageUrlInput) {
-                imageUrlInput.value = dish.imageUrl;
-            }
-
-            form.elements['ingredient'].value = dish.ingredient;
-
-            // Заполните категории и типы (пример)
-            if (dish.typeDishes && dish.typeDishes.length > 0) {
-                document.getElementById('selectedCategoryId').value = dish.typeDishes[0].id;
-                document.getElementById('categoryDropdownBtn').textContent = dish.typeDishes[0].name;
-            }
-            if (dish.types && dish.types.length > 0) {
-                document.getElementById('selectedTypeId').value = dish.types[0].id;
-                document.getElementById('typeDropdownBtn').textContent = dish.types[0].name;
-            }
-        }*/
         adminContent.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', async e => {
                 const dishId = e.currentTarget.getAttribute('data-dish-id');
@@ -719,28 +659,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // Рендерим форму с переданными данными для редактирования
                     renderAddDishForm(categories, types, dish);
-
-                    // Обработчики навешиваются внутри renderAddDishForm
-
                 } catch (error) {
                     showUniversalToast('Ошибка', 'Не удалось загрузить данные блюда: ' + error.message, 'danger');
                 }
             });
         });
 
-
-
-
-
-
-
         //Кнопка удаления блюда
         adminContent.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', e => {
+            btn.addEventListener('click', async e => {
                 const dishId = e.currentTarget.getAttribute('data-dish-id');
-                console.log('Удалить блюдо с id:', dishId);
+                if (!dishId) return;
+
+                if (!confirm('Вы уверены, что хотите удалить это блюдо?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/admin/dishes/${dishId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        showUniversalToast('Ошибка', errorData.error || 'Не удалось удалить блюдо', 'danger');
+                        return;
+                    }
+
+                    showUniversalToast('Успех', 'Блюдо успешно удалено', 'success');
+                    await renderButtonsAndFilters();
+
+                } catch (error) {
+                    showUniversalToast('Ошибка', 'Ошибка сети: ' + error.message, 'danger');
+                }
             });
         });
+
     }
 
     // Пагинация
@@ -830,6 +787,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <button type="button" class="btn btn-success" id="btnAddDish">
                 Добавить блюдо
             </button>
+            <button type="button" class="btn btn-success" id="deletedDish">
+                Корзина
+            </button>
         `;
         adminContent.appendChild(buttonsContainer);
 
@@ -849,6 +809,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
+
 
         initDropdownHandler(buttonsContainer, 1, (target, btn) => {
             selectedCategoryId = target.dataset.categoryId || null;
@@ -870,6 +831,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const types = await fetchTypes();
 
             renderAddDishForm(categories, types);
+        });
+
+        buttonsContainer.querySelector('#deletedDish').addEventListener('click', () => {
+            window.loadAndRenderDeletedDishes();
         });
 
         window.loadAndRenderDishes();
@@ -1254,34 +1219,6 @@ function attachDropdownHandlers() {
     });
 }
 
-/*//обработка формы отправки и отмены
-function attachFormHandlers() {
-    document.getElementById('addDishForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const price = parseFloat(document.getElementById('dishPrice').value);
-        const weight = parseInt(document.getElementById('dishWeight').value, 10);
-
-        if (isNaN(price) || price < 0) {
-            showUniversalToast('Ошибка', 'Цена должна быть 0 или больше.', 'danger');
-            return;
-        }
-        if (isNaN(weight) || weight <= 0) {
-            showUniversalToast('Ошибка', 'Вес должен быть больше 0.', 'danger');
-            return;
-        }
-        const success = await submitAddDishForm();
-        if (success) {
-            resetAddDishForm();
-            openDishesListTab();
-            renderButtonsAndFilters();
-        }
-    });
-
-    document.getElementById('btnCancelAddDish').addEventListener('click', () => {
-        renderButtonsAndFilters();
-    });
-}*/
-
 //загрузка блюд и категорий из бд
 async function fetchCategories() {
     try {
@@ -1394,31 +1331,158 @@ async function submitEditDishForm(dishId) {
     }
 }
 
-/*async function editDish(dishId) {
+
+//отрисовка удалённых карточек
+window.loadAndRenderDeletedDishes = async function() {
+    const adminContent = document.getElementById('adminContent');
+    adminContent.innerHTML = '';
+
+    // Создаём контейнер для карточек удалённых блюд
+    const deletedDishesContainer = document.createElement('div');
+    deletedDishesContainer.id = 'deletedDishesContainer';
+    adminContent.appendChild(deletedDishesContainer);
+
     try {
-        const [dishResponse, categories, types] = await Promise.all([
-            fetch(`/admin/dishes/${dishId}`),
-            fetchCategories(),
-            fetchTypes()
-        ]);
-        if (!dishResponse.ok) throw new Error('Ошибка загрузки блюда');
-        const dish = await dishResponse.json();
-        renderAddDishForm(categories, types, dish);
+        const response = await fetch('/admin/deleted/dishes/load');
+        if (!response.ok) {
+            const errorData = await response.json();
+            showUniversalToast('Ошибка', errorData.error || 'Не удалось загрузить удалённые блюда', 'danger');
+            return;
+        }
+        const deletedDishes = await response.json();
+
+        window.renderDeletedCards(deletedDishes, deletedDishesContainer);
+
     } catch (error) {
-        showUniversalToast('Ошибка', 'Не удалось загрузить данные блюда: ' + error.message, 'danger');
+        showUniversalToast('Ошибка', 'Ошибка сети: ' + error.message, 'danger');
     }
+};
+
+//генерация удалённых карточек
+window.renderDeletedCards = function(dishes, container) {
+    container.innerHTML = '';
+
+    const backButton = document.createElement('button');
+    backButton.type = 'button';
+    backButton.className = 'btn btn-secondary mb-3';
+    backButton.textContent = 'Назад';
+
+    backButton.addEventListener('click', () => {
+        renderButtonsAndFilters();
+    });
+
+    container.appendChild(backButton);
+
+    if (!dishes || dishes.length === 0) {
+        const noData = document.createElement('p');
+        noData.textContent = 'Нет блюд для отображения';
+        container.appendChild(noData);
+        return;
+    }
+
+
+    const row = document.createElement('div');
+    row.className = 'row row-cols-1 row-cols-md-3 g-4';
+    container.appendChild(row);
+
+    dishes.forEach(dish => {
+        const col = document.createElement('div');
+        col.className = 'col';
+        const encodedImageUrl = dish.imageUrl;
+
+        col.innerHTML = `
+            <div class="card h-100 d-flex flex-column">
+                <div class="d-flex justify-content-center mb-3">
+                    <img src="${encodedImageUrl}" class="card-img-top img-fluid" alt="${dish.name}" style="max-height: 200px; object-fit: contain;">
+                </div>
+                <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+                    <h5 class="card-title">${dish.name}</h5>
+                    <p class="card-text ingredient-text">${dish.ingredient}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto mb-3">
+                        <h5 class="card-title">${dish.price} руб.</h5>
+                        <p class="card-text">${dish.weight} г.</p>
+                    </div>
+                    <div class="btn-group-responsive d-flex justify-content-between">
+                        <button type="button" class="btn btn-success btn-restore" data-dish-id="${dish.id}" style="flex: 1; margin-right: 5px;">
+                            Восстановить
+                        </button>
+                        <button type="button" class="btn btn-danger btn-delete-permanent" data-dish-id="${dish.id}" style="flex: 1; margin-left: 5px;">
+                            Удалить навсегда
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        row.appendChild(col);
+        attachDeletePermanentHandlers();
+        attachRestoreHandlers();
+    });
+};
+
+//удаление навсегда
+function attachDeletePermanentHandlers() {
+    document.querySelectorAll('.btn-delete-permanent').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const dishId = e.currentTarget.dataset.dishId;
+            if (!dishId) return;
+
+            const confirmed = confirm('Вы уверены, что хотите удалить блюдо навсегда? Это действие нельзя отменить.');
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`/admin/deleted/dishes/${dishId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    showUniversalToast('Ошибка', errorData.error || 'Не удалось удалить блюдо', 'danger');
+                    return;
+                }
+
+                showUniversalToast('Успех', 'Блюдо успешно удалено навсегда', 'success');
+
+                const container = document.getElementById('deletedDishesContainer');
+                if (container) {
+                    await window.loadAndRenderDeletedDishes();
+                }
+            } catch (error) {
+                showUniversalToast('Ошибка', 'Ошибка сети: ' + error.message, 'danger');
+            }
+        });
+    });
 }
 
-async function resetAddDishForm() {
-    const categories = await fetchCategories();
-    const types = await fetchTypes();
-    renderAddDishForm(categories, types);
+//восстановление блюда из корзины
+function attachRestoreHandlers() {
+    document.querySelectorAll('.btn-restore').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const dishId = e.currentTarget.dataset.dishId;
+            if (!dishId) return;
+
+            try {
+                const response = await fetch(`/admin/restore/${dishId}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    showUniversalToast('Ошибка', errorData.error || 'Не удалось восстановить блюдо', 'danger');
+                    return;
+                }
+
+                showUniversalToast('Успех', 'Блюдо успешно восстановлено', 'success');
+
+                await window.loadAndRenderDeletedDishes();
+            } catch (error) {
+                showUniversalToast('Ошибка', 'Ошибка сети: ' + error.message, 'danger');
+            }
+        });
+    });
 }
 
 
-async function openDishesListTab() {
-    await renderButtonsAndFilters();
-}*/
 
 
 

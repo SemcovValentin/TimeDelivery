@@ -31,8 +31,4 @@ public class DishesDTO {
         this.types = types;
     }
 
-    // Метод для преобразования DTO в Entity
-    public Dishes toEntity() {
-        return new Dishes(name, price, weight, imageUrl, ingredient, typeDishes,types);
-    }
 }

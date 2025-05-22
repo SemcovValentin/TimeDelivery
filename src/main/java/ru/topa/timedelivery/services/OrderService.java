@@ -1,12 +1,11 @@
 package ru.topa.timedelivery.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.topa.timedelivery.DTOs.OrderDTO;
-import ru.topa.timedelivery.DTOs.OrderItemDTO;
-import ru.topa.timedelivery.DTOs.OrderResponseDTO;
+import ru.topa.timedelivery.DTOs.*;
 import ru.topa.timedelivery.entities.catalog.Dishes;
 import ru.topa.timedelivery.entities.orders.Order;
 import ru.topa.timedelivery.entities.orders.OrderItem;
@@ -131,6 +130,48 @@ public class OrderService {
         order = orderRepository.save(order);
 
         return order;
+    }
+
+    public List<OrderAdminDTO> getAllOrdersForAdmin() {
+        return orderRepository.findAll().stream()
+                .map(order -> new OrderAdminDTO(
+                        order.getId(),
+                        order.getStatus(),
+                        order.getCreatedAt(),
+                        order.getUser().getName(),
+                        order.getCourier() != null ? order.getCourier().getId() : null,
+                        order.getCourier() != null ? order.getCourier().getName() : null
+                ))
+                .collect(Collectors.toList());
+    }
+
+
+    public List<CourierDTO> getAllCouriers() {
+        List<User> couriers = userRepository.findAllByRoles_Name("ROLE_COURIER");
+        return couriers.stream()
+                .map(u -> new CourierDTO(u.getId(), u.getName()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void assignCourier(Long orderId, Long courierId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Заказ не найден"));
+
+        User courier = null;
+        if (courierId != null) {
+            courier = userRepository.findById(courierId)
+                    .orElseThrow(() -> new EntityNotFoundException("Курьер не найден"));
+            // Можно проверить, что у пользователя есть роль курьера
+            boolean isCourier = courier.getRoles().stream()
+                    .anyMatch(role -> "ROLE_COURIER".equals(role.getName()));
+            if (!isCourier) {
+                throw new IllegalArgumentException("Пользователь не является курьером");
+            }
+        }
+
+        order.setCourier(courier);
+        orderRepository.save(order);
     }
 
 }

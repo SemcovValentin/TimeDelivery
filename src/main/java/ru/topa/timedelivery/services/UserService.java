@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Service;
 import ru.topa.timedelivery.DTOs.ClientDTO;
 import ru.topa.timedelivery.DTOs.EmployeeDTO;
 import ru.topa.timedelivery.DTOs.UserDTO;
+import ru.topa.timedelivery.entities.orders.Order;
 import ru.topa.timedelivery.entities.persons.Client;
 import ru.topa.timedelivery.entities.persons.Role;
 import ru.topa.timedelivery.entities.persons.User;
 import ru.topa.timedelivery.repositories.ClientRepository;
+import ru.topa.timedelivery.repositories.OrderRepository;
 import ru.topa.timedelivery.repositories.RoleRepository;
 import ru.topa.timedelivery.repositories.UserRepository;
 
@@ -23,10 +26,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 
 @Service
 public class UserService {
@@ -35,14 +38,17 @@ public class UserService {
     private final ClientRepository clientRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OrderRepository orderRepository;
 
-    public UserService(UserRepository userRepository, ClientRepository clientRepository, RoleRepository roleRepository,PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, ClientRepository clientRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, OrderRepository orderRepository) {
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.orderRepository = orderRepository;
     }
 
+    @Transactional
     public void deleteEmployee(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
@@ -55,8 +61,27 @@ public class UserService {
             throw new ForbiddenOperationException("Удаление данного пользователя запрещено");
         }
 
+        // Очистить связь с Client
+        Optional<Client> clientOpt = clientRepository.findByUser(user);
+
+        if (clientOpt.isPresent()) {
+            Client client = clientOpt.get();
+            client.setUser(null);
+            clientRepository.delete(client);
+        }
+
+        // Очистить ссылки courier у заказов, если нужно
+        List<Order> orders = orderRepository.findAllByCourier(user);
+        for (Order order : orders) {
+            order.setCourier(null);
+        }
+        orderRepository.saveAll(orders);
+
         userRepository.delete(user);
     }
+
+
+
 
     @Value("${default.user.password}")
     private String defaultUserPassword;
@@ -169,8 +194,6 @@ public class UserService {
             super(message);
         }
     }
-
-
 
     public Page<ClientDTO> getClients(int page, int size, String sortBy, String direction) {
         Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;

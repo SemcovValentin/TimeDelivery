@@ -16,15 +16,15 @@ import ru.topa.timedelivery.DTOs.ClientDTO;
 import ru.topa.timedelivery.DTOs.DishesDTO;
 import ru.topa.timedelivery.DTOs.EmployeeDTO;
 import ru.topa.timedelivery.DTOs.RoleDTO;
-import ru.topa.timedelivery.entities.catalog.Dishes;
+import ru.topa.timedelivery.entities.catalog.DeletedDishes;
 import ru.topa.timedelivery.entities.catalog.TypeDishes;
 import ru.topa.timedelivery.entities.persons.Role;
 import ru.topa.timedelivery.entities.persons.User;
 import ru.topa.timedelivery.repositories.*;
 import ru.topa.timedelivery.services.*;
 
-import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -44,6 +44,8 @@ public class AdminController {
     private UserService userService;
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private DeletedDishesRepository deletedDishesRepository;
 
 
     @GetMapping("/")
@@ -95,55 +97,26 @@ public class AdminController {
     @PutMapping("/dishes/{id}")
     public ResponseEntity<?> updateDish(
             @PathVariable Long id,
-            @RequestParam("name") String name,
-            @RequestParam("price") Double price,
-            @RequestParam("weight") Integer weight,
-            @RequestParam("ingredient") String ingredient,
-            @RequestParam("categoryId") Long categoryId,
-            @RequestParam("typeId") Long typeId,
+            @RequestParam String name,
+            @RequestParam double price,
+            @RequestParam int weight,
+            @RequestParam String ingredient,
+            @RequestParam Long categoryId,
+            @RequestParam Long typeId,
             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
 
         try {
             DishesDTO updatedDish = dishesService.updateDish(id, name, price, weight, ingredient, categoryId, typeId, imageFile);
             return ResponseEntity.ok(updatedDish);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Ошибка сервера при обновлении блюда"));
         }
     }
-
-
-    /*@PostMapping(value = "/create/dishes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Dishes> createDish(
-            @RequestParam("name") String name,
-            @RequestParam("price") double price,
-            @RequestParam("weight") int weight,
-            @RequestParam("ingredient") String ingredient,
-            @RequestParam("categoryId") Long categoryId,
-            @RequestParam("typeId") Long typeId,
-            @RequestPart("image") MultipartFile imageFile
-    ) {
-        // 1. Сохраняем изображение на диск и получаем URL
-        String imageUrl = fileStorageService.saveImage(imageFile);
-
-        // 2. Загружаем категории и типы
-        Set<TypeDishes> categories = new HashSet<>();
-        categories.add(typeDishesRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Категория не найдена")));
-
-        Set<Type> types = new HashSet<>();
-        types.add(typeRepository.findById(typeId)
-                .orElseThrow(() -> new IllegalArgumentException("Тип не найден")));
-
-        // 3. Создаём блюдо
-        Dishes dish = new Dishes(name, price, weight, imageUrl, ingredient, categories, types);
-        Dishes saved = dishesRepository.save(dish);
-
-        return ResponseEntity.ok(saved);
-    }*/
 
     @GetMapping("/dishes/{dishId}")
     public ResponseEntity<DishesDTO> getDishById(@PathVariable Long dishId) {
@@ -183,6 +156,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/employees/{id}")
+    @ResponseBody
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         try {
             userService.deleteEmployee(id);
@@ -196,27 +170,6 @@ public class AdminController {
         }
     }
 
-
-    /*@DeleteMapping("/employees/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-        Optional<User> userOpt = userRepository.findById(id);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        User user = userOpt.get();
-
-        boolean isEmployee = user.getRoles().stream()
-                .map(Role::getName)
-                .anyMatch(role -> !role.equals("ROLE_ADMIN") && !role.equals("ROLE_USER"));
-
-        if (!isEmployee) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        userRepository.delete(user);
-        return ResponseEntity.noContent().build();
-    }*/
 
     @PostMapping("/employees")
     public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO dto) {
@@ -234,43 +187,6 @@ public class AdminController {
                     .body(Map.of("message", "Внутренняя ошибка сервера"));
         }
     }
-
-
-    /*@PostMapping("/employees")
-    public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO dto) {
-
-        if (userRepository.findByName(dto.getPhone()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Пользователь с таким телефоном уже существует"));
-        }
-        if (clientRepository.findByEmail(dto.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Пользователь с такой почтой уже существует"));
-        }
-
-        User user = new User();
-        user.setName(dto.getPhone());
-        user.setPassword(passwordEncoder.encode(defaultUserPassword));
-
-        Set<Role> roles = dto.getRoles().stream()
-                .map(roleName -> roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new RuntimeException("Роль не найдена: " + roleName)))
-                .collect(Collectors.toSet());
-        user.setRoles(roles);
-
-        Client client = new Client();
-        client.setName(dto.getName());
-        client.setEmail(dto.getEmail());
-        client.setPhone(dto.getPhone());
-        client.setUser(user);
-
-        user.setClient(client);
-
-        clientRepository.save(client);
-        userRepository.save(user);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }*/
 
     @GetMapping("/roles")
     @ResponseBody
@@ -298,27 +214,6 @@ public class AdminController {
         }
     }
 
-
-    /*@PostMapping("/roles")
-    public ResponseEntity<?> addRole(@RequestBody RoleDTO roleDTO) {
-        String roleName = roleDTO.getName();
-
-        if (!roleName.startsWith("ROLE_")) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Имя роли должно начинаться с 'ROLE_'"));
-        }
-
-        if (roleRepository.findByName(roleName).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Роль с таким именем уже существует"));
-        }
-
-        Role role = new Role(roleName);
-        roleRepository.save(role);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }*/
-
     @DeleteMapping("/roles/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable Long id) {
         try {
@@ -338,33 +233,6 @@ public class AdminController {
         }
     }
 
-
-    /*@DeleteMapping("/roles/{id}")
-    public ResponseEntity<?> deleteRole(@PathVariable Long id) {
-        Optional<Role> roleOpt = roleRepository.findById(id);
-        if (roleOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Role role = roleOpt.get();
-
-        // Запрет на удаление системных ролей
-        if ("ROLE_USER".equals(role.getName()) || "ROLE_ADMIN".equals(role.getName())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "Удаление системных ролей запрещено"));
-        }
-
-        // Проверяем, используется ли роль у пользователей
-        boolean isRoleUsed = userRepository.existsByRoles(role);
-        if (isRoleUsed) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Роль используется у пользователей и не может быть удалена"));
-        }
-
-        roleRepository.delete(role);
-        return ResponseEntity.noContent().build();
-    }*/
-
     @PutMapping("/employees/{id}")
     public ResponseEntity<?> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO dto) {
         try {
@@ -382,53 +250,6 @@ public class AdminController {
     }
 
 
-    /*@PutMapping("/employees/{id}")
-    public ResponseEntity<?> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO dto) {
-        Optional<User> userOpt = userRepository.findById(id);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        User user = userOpt.get();
-        Client client = user.getClient();
-
-        if (!user.getName().equals(dto.getPhone()) && userRepository.findByName(dto.getPhone()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Пользователь с таким телефоном уже существует"));
-        }
-        if (client != null && !dto.getEmail().equalsIgnoreCase(client.getEmail())) {
-            Optional<Client> clientWithEmail = clientRepository.findByEmail(dto.getEmail());
-            if (clientWithEmail.isPresent() && !clientWithEmail.get().getId().equals(client.getId())) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("message", "Пользователь с такой почтой уже существует"));
-            }
-        }
-
-        user.setName(dto.getPhone());
-
-        // Обновляем роли
-        Set<Role> roles = dto.getRoles().stream()
-                .map(roleName -> roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new RuntimeException("Роль не найдена: " + roleName)))
-                .collect(Collectors.toSet());
-        user.setRoles(roles);
-
-        // Обновляем данные клиента
-        if (client == null) {
-            client = new Client();
-            client.setUser(user);
-            user.setClient(client);
-        }
-        client.setName(dto.getName());
-        client.setEmail(dto.getEmail());
-        client.setPhone(dto.getPhone());
-
-        clientRepository.save(client);
-        userRepository.save(user);
-
-        return ResponseEntity.ok().build();
-    }*/
-
     @GetMapping("/clients")
     public ResponseEntity<Page<ClientDTO>> getClients(
             @RequestParam(defaultValue = "0") int page,
@@ -439,62 +260,6 @@ public class AdminController {
         Page<ClientDTO> clientsPage = userService.getClients(page, size, sortBy, direction);
         return ResponseEntity.ok(clientsPage);
     }
-
-    /*@GetMapping("/clients")
-    public ResponseEntity<Page<ClientDTO>> getClients(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
-
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        Specification<User> spec = (root, query, cb) -> {
-            Join<User, Role> roles = root.join("roles");
-            Join<User, Client> clientJoin = root.join("client", JoinType.LEFT);
-
-            Predicate rolePredicate = cb.equal(roles.get("name"), "ROLE_USER");
-
-            Set<String> clientFields = Set.of("address", "email", "name", "city", "birthday");
-            Set<String> userFields = Set.of("id", "name");
-
-            String sortProperty = sortBy;
-            if (!clientFields.contains(sortBy) && !userFields.contains(sortBy)) {
-                sortProperty = "id";
-            }
-
-            if (clientFields.contains(sortProperty)) {
-                if (sortDirection == Sort.Direction.ASC) {
-                    query.orderBy(cb.asc(clientJoin.get(sortProperty)));
-                } else {
-                    query.orderBy(cb.desc(clientJoin.get(sortProperty)));
-                }
-            } else {
-                if (sortDirection == Sort.Direction.ASC) {
-                    query.orderBy(cb.asc(root.get(sortProperty)));
-                } else {
-                    query.orderBy(cb.desc(root.get(sortProperty)));
-                }
-            }
-
-            return rolePredicate;
-        };
-
-
-        Page<User> usersPage = userRepository.findAll(spec, pageable);
-
-        Page<ClientDTO> dtoPage = usersPage.map(user -> {
-            Client client = user.getClient();
-            ClientDTO dto = client != null ? ClientDTO.from(client) : new ClientDTO();
-            dto.setPhone(user.getName());
-            dto.setId(user.getId());
-            return dto;
-        });
-
-        return ResponseEntity.ok(dtoPage);
-    }*/
 
     @GetMapping("/dishes")
     @ResponseBody
@@ -507,43 +272,54 @@ public class AdminController {
         return dishesService.getAllDishes(page, size, categoryId, typeId);
     }
 
-    /*@GetMapping("/dishes")
-    @ResponseBody
-    public Page<DishesDTO> getAllDishes(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long typeId) {
-
-        Page<Dishes> dishesPage;
-
-        if (categoryId != null && typeId != null) {
-            dishesPage = dishesRepository.findByTypeDishes_IdAndTypes_Id(categoryId, typeId, PageRequest.of(page, size));
-        } else if (categoryId != null) {
-            dishesPage = dishesRepository.findByTypeDishes_Id(categoryId, PageRequest.of(page, size));
-        } else if (typeId != null) {
-            dishesPage = dishesRepository.findByTypes_Id(typeId, PageRequest.of(page, size));
-        } else {
-            dishesPage = dishesRepository.findAll(PageRequest.of(page, size));
+    @DeleteMapping("/dishes/{id}")
+    public ResponseEntity<?> deleteDish(@PathVariable Long id) {
+        try {
+            dishesService.deleteDish(id);
+            return ResponseEntity.ok(Map.of("message", "Блюдо успешно удалено"));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Ошибка при удалении блюда"));
         }
+    }
 
-        return dishesPage.map(this::toDTO);
+    @PostMapping("/restore/{id}")
+    public ResponseEntity<?> restoreDish(@PathVariable Long id) {
+        try {
+            DishesDTO restoredDish = dishesService.restoreDish(id);
+            return ResponseEntity.ok(restoredDish);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Ошибка при восстановлении блюда"));
+        }
+    }
+
+    @GetMapping("/deleted/dishes/load")
+    public ResponseEntity<List<DishesDTO>> getAllDeletedDishes() {
+        List<DeletedDishes> deletedDishes = deletedDishesRepository.findAll();
+
+        List<DishesDTO> dtos = deletedDishes.stream()
+                .map(dishesService::toDTOFromDeleted)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    @DeleteMapping("/deleted/dishes/{id}")
+    public ResponseEntity<?> deleteDeletedDish(@PathVariable Long id) {
+        try {
+            dishesService.deleteById(id);
+            return ResponseEntity.ok(Map.of("message", "Блюдо удалено навсегда"));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Ошибка при удалении блюда"));
+        }
     }
 
 
-    private DishesDTO toDTO(Dishes dish) {
-        DishesDTO dto = new DishesDTO(
-                dish.getName(),
-                dish.getPrice(),
-                dish.getWeight(),
-                dish.getImageUrl(),
-                dish.getIngredient(),
-                dish.getTypeDishes(),
-                dish.getTypes()
-        );
-        dto.setId(dish.getId());
-        return dto;
-    }*/
 
 
 

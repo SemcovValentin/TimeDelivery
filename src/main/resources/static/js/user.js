@@ -76,7 +76,6 @@ document.getElementById('offcanvasUserEdit').addEventListener('show.bs.offcanvas
         document.getElementById('userPhoneInput').value = user.phone || '';
         oldPhone = user.phone || '';
 
-        // Очистка паролей
         document.getElementById('userPasswordCurrent').value = '';
         document.getElementById('userPasswordNew').value = '';
         document.getElementById('userPasswordNewCheck').value = '';
@@ -247,10 +246,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+/*async function loadAndRenderUserOrders(userOrders) {
+    const allDishes = await loadAllDishes();
+    renderUserOrdersTable(userOrders, allDishes);
+}*/
 async function loadAndRenderUserOrders(userOrders) {
-    const allDishes = await loadAllDishes(); // из common.js
+    if (typeof loadAllDishes !== 'function') {
+        console.warn('loadAllDishes не определена, пропускаем загрузку блюд');
+        renderUserOrdersTable(userOrders, []);
+        return;
+    }
+    const allDishes = await loadAllDishes();
     renderUserOrdersTable(userOrders, allDishes);
 }
+
 
 // Функция для рендера таблицы заказов пользователя
 function renderUserOrdersTable(userOrders, allDishes) {

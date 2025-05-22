@@ -50,5 +50,4 @@ public class Client {
     @Pattern(regexp = "^\\+?[1-9][0-9]{7,14}$",message = "Phone number must be valid")
     @Column(unique = true)
     private String phone;
-
 }
