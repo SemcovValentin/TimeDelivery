@@ -46,6 +46,7 @@ public class AuthController {
         }
         User user = (User) authentication.getPrincipal();
         UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
         userDTO.setPhone(user.getName());
         return ResponseEntity.ok(userDTO);
     }
@@ -79,12 +80,10 @@ public class AuthController {
             cookie.setMaxAge(60 * 60);
             response.addCookie(cookie);
 
-            // Получаем роли пользователя в виде Set<String>
             Set<String> roles = user.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toSet());
 
-            // Возвращаем токен, имя и роли
             return ResponseEntity.ok(new AuthResponse(jwt, user.getUsername(), roles));
 
         } catch (Exception ex) {

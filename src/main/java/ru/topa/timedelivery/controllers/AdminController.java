@@ -249,18 +249,6 @@ public class AdminController {
         }
     }
 
-
-    @GetMapping("/clients")
-    public ResponseEntity<Page<ClientDTO>> getClients(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
-
-        Page<ClientDTO> clientsPage = userService.getClients(page, size, sortBy, direction);
-        return ResponseEntity.ok(clientsPage);
-    }
-
     @GetMapping("/dishes")
     @ResponseBody
     public Page<DishesDTO> getAllDishes(

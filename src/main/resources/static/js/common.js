@@ -108,7 +108,6 @@ if (carouselIndicators) {
 
 ////////////////////////////////////////////////////////////////
 //переход по поиску
-
 const searchInput = document.querySelector('input[type="search"]');
 
 if (searchInput) {
@@ -201,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Получить список НЕвыбранных типов из чекбоксов
+    // Получить список НЕ выбранных типов из чекбоксов
     function getUnselectedTypes() {
         const allCheckboxes = document.querySelectorAll('.btn-check');
         return Array.from(allCheckboxes)
@@ -449,7 +448,7 @@ if (cartTableContainer) {
     });
 }
 
-//сохраняем комент в localStorage
+//сохраняем коммент в localStorage
 document.addEventListener('input', function(e) {
     if (e.target && e.target.id === 'cartComment') {
         localStorage.setItem('cartComment', e.target.value);

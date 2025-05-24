@@ -245,11 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
-/*async function loadAndRenderUserOrders(userOrders) {
-    const allDishes = await loadAllDishes();
-    renderUserOrdersTable(userOrders, allDishes);
-}*/
 async function loadAndRenderUserOrders(userOrders) {
     if (typeof loadAllDishes !== 'function') {
         console.warn('loadAllDishes не определена, пропускаем загрузку блюд');
@@ -332,8 +327,9 @@ function renderUserOrdersTable(userOrders, allDishes) {
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="order-number">Заказ №${order.id}</div>
                     <div><small class="order-number">Дата: ${new Date(order.createdAt).toLocaleString()}</small></div>
-                    <div><span class="badge bg-info text-dark">${order.status || 'Неизвестен'}</span></div>
+                    <div><span class="badge bg-info text-dark order-status">${statusLabels[order.status] || 'NEW'}</span></div>
                 </div>
+               
                 <div class="card-body p-0">
                     <table class="table table-striped align-middle mb-0">
                         <thead>
@@ -403,18 +399,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Обработчик открытия корзины
-/*
-document.querySelectorAll('.cart-btn').forEach(btn => {
-    btn.addEventListener('click', async function(e) {
-        e.preventDefault();
-        try {
-            const dishes = await loadAllDishes();
-            renderCartTable(dishes);
-            const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-            cartModal.show();
-        } catch (error) {
-            console.error('Ошибка загрузки блюд:', error);
-        }
-    });
-});*/
+//обновление статуса заказа
+const statusLabels = {
+    ACCEPTED: 'Заказ принят',
+    PROCESSING: 'Заказ в обработке',
+    ON_THE_WAY: 'Курьер выехал',
+    DELIVERED: 'Заказ доставлен'
+};
+
+async function updateUserOrderStatuses() {
+    try {
+        const response = await fetch('/timeDelivery/orders/userOrders', { credentials: 'include' });
+        if (!response.ok) throw new Error('Ошибка при загрузке статусов');
+
+        const userOrders = await response.json();
+        userOrders.forEach(order => {
+            const orderCard = document.querySelector(`.card[data-order-id="${order.id}"]`);
+            if (orderCard) {
+                const statusElem = orderCard.querySelector('.order-status');
+                if (statusElem) {
+                    const newStatusText = statusLabels[order.status] || 'NEW';
+                    if (statusElem.textContent !== newStatusText) {
+                        statusElem.textContent = newStatusText;
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.error('Ошибка обновления статусов заказов:', e);
+    }
+}
+
+// Запускаем обновление статусов каждые 10 секунд
+setInterval(updateUserOrderStatuses, 10000);
+
+

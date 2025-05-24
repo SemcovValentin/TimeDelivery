@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.topa.timedelivery.entities.persons.Client;
 import ru.topa.timedelivery.entities.persons.User;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +28,10 @@ public class Order {
 
     private String status;
 
-    @Column(name = "comment", columnDefinition = "TEXT") //
+    @Column(name = "total_amount", nullable = false, columnDefinition = "DECIMAL(10,2) default 0")
+    private BigDecimal totalAmount = BigDecimal.ZERO;
+
+    @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
     @ManyToOne
@@ -42,5 +47,10 @@ public class Order {
     @JoinColumn(name = "courier_id")
     @JsonManagedReference
     private User courier;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    @JsonManagedReference
+    private Client client;
 
 }

@@ -62,7 +62,6 @@ function updateLoginButton(clientName, roles) {
     loginBtn.removeAttribute('data-bs-target');
     loginBtn.removeAttribute('aria-controls');
 
-    // Если roles - строка, обернём в массив
     if (!Array.isArray(roles)) {
         try {
             roles = JSON.parse(roles);
