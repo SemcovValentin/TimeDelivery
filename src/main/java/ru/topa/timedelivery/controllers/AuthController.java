@@ -18,6 +18,7 @@ import ru.topa.timedelivery.entities.persons.User;
 import ru.topa.timedelivery.models.ClientService;
 import ru.topa.timedelivery.security.JwtService;
 import ru.topa.timedelivery.services.UserDetailService;
+import ru.topa.timedelivery.services.UserService;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -104,46 +105,23 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+   @PostMapping("/register")
+   public ResponseEntity<String> register(@RequestBody AuthRequest authRequest) {
+       try {
+           userDetailService.registerDefaultUser(
+                   authRequest.getName(),
+                   authRequest.getEmail(),
+                   authRequest.getPhone(),
+                   authRequest.getPassword()
+           );
+           return ResponseEntity.ok("User registered successfully");
+       } catch (UserService.DuplicateEmailException e) {
+           return ResponseEntity.status(HttpStatus.CONFLICT).body("Такая почта уже занята");
+       } catch (UserService.DuplicatePhoneException e) {
+           return ResponseEntity.status(HttpStatus.CONFLICT).body("Такой телефон уже занят");
+       } catch (Exception e) {
+           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка регистрации");
+       }
+   }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody AuthRequest authRequest) {
-        userDetailService.registerDefaultUser(
-                authRequest.getName(),
-                authRequest.getEmail(),
-                authRequest.getPhone(),
-                authRequest.getPassword()
-        );
-        return ResponseEntity.ok("User registered is ok");
-    }
-
-
-    @PostMapping("/register/admin")
-    public ResponseEntity<String> registerAdmin(@RequestBody AuthRequest authRequest){
-        userDetailService.registerAdmin(
-                authRequest.getName(),
-                authRequest.getEmail(),
-                authRequest.getPhone(),
-                authRequest.getPassword());
-        return ResponseEntity.ok("Admin registered is ok");
-    }
-
-    @PostMapping("/register/moderator")
-    public ResponseEntity<String> registerModerator(@RequestBody AuthRequest authRequest){
-        userDetailService.registerModerator(
-                authRequest.getName(),
-                authRequest.getEmail(),
-                authRequest.getPhone(),
-                authRequest.getPassword());
-        return ResponseEntity.ok("Moderator registered is ok");
-    }
-
-    @PostMapping("/register/courier")
-    public ResponseEntity<String> registerCourier(@RequestBody AuthRequest authRequest){
-        userDetailService.registerCourier(
-                authRequest.getName(),
-                authRequest.getEmail(),
-                authRequest.getPhone(),
-                authRequest.getPassword());
-        return ResponseEntity.ok("Courier registered is ok");
-    }
 }

@@ -37,7 +37,4 @@ public class CourierController {
         return ResponseEntity.ok(orders);
     }
 
-
-
-
 }

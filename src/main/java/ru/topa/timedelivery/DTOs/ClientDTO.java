@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import ru.topa.timedelivery.entities.persons.Client;
-import ru.topa.timedelivery.entities.persons.User;
 
 import java.time.LocalDate;
 

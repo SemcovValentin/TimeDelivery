@@ -31,15 +31,6 @@ public class ModeratorController {
         return "moderator";
     }
 
-    /*@GetMapping("/orders")
-    @ResponseBody
-    public ResponseEntity<Page<OrderAdminDTO>> getOrdersPage(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Page<OrderAdminDTO> ordersPage = orderService.getOrdersPage(page, size);
-        return ResponseEntity.ok(ordersPage);
-    }*/
-
     @GetMapping("/couriers")
     @ResponseBody
     public List<CourierDTO> getCouriers() {

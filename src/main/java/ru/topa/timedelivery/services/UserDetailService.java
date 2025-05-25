@@ -33,7 +33,6 @@ public class UserDetailService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-
     public User registerUser(String name, String email, String phone, String password, Role role) {
         User user = new User();
         user.setName(phone);
@@ -50,25 +49,19 @@ public class UserDetailService implements UserDetailsService {
     }
 
     public User registerDefaultUser(String name, String email, String phone, String password) {
+        if (userRepository.existsByClientEmail(email)) {
+            throw new UserService.DuplicateEmailException("Такая почта уже занята");
+        }
+
+        if (userRepository.existsByName(phone)) {
+            throw new UserService.DuplicatePhoneException("Такой телефон уже занят");
+        }
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseGet(() -> roleRepository.save(Role.userRole()));
 
         return registerUser(name, email, phone, password, userRole);
     }
 
-    public User registerCourier(String name, String email, String phone, String password) {
-        Role userRole = roleRepository.findByName("ROLE_COURIER")
-                .orElseGet(() -> roleRepository.save(Role.courierRole()));
-
-        return registerUser(name, email, phone, password, userRole);
-    }
-
-    public User registerModerator(String name, String email, String phone, String password) {
-        Role userRole = roleRepository.findByName("ROLE_MODERATOR")
-                .orElseGet(() -> roleRepository.save(Role.moderatorRole()));
-
-        return registerUser(name, email, phone, password, userRole);
-    }
 
     public User registerAdmin(String name, String email, String phone, String password) {
         Role userRole = roleRepository.findByName("ROLE_ADMIN")

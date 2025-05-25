@@ -9,37 +9,37 @@ body, html {
 }
 
 .card:hover {
-    transform: scale(1.05); /* Увеличение на 5% */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Тень */
-    z-index: 10; /* Чтобы карточка была поверх соседних */
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    z-index: 10;
 }
 
 #scrollToTopBtn.show {
     display: block !important;
 }
 #scrollToTopBtn {
-    display: none; /* Hidden by default */
-    position: fixed; /* Fixed position */
-    bottom: 20px; /* Distance from the bottom */
-    right: 20px; /* Distance from the right */
-    z-index: 99; /* Make sure it does not overlap */
-    border: none; /* Remove border */
-    outline: none; /* Remove outline */
-    background-color: transparent; /* Transparent background */
-    cursor: pointer; /* Add a mouse pointer on hover */
-    padding: 0; /* Remove padding */
-    transition: transform 0.3s ease; /* Add transition for smooth effect */
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 99;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.3s ease;
 }
 
 #scrollToTopBtn img {
-    width: 40px; /* Размер изображения */
-    height: 40px; /* Размер изображения */
-    border-radius: 50%; /* Rounded corners */
-    transition: transform 0.3s ease; /* Add transition for smooth effect */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
 }
 
 #scrollToTopBtn:hover img {
-    transform: scale(1.1); /* Increase size on hover */
+    transform: scale(1.1);
 }
 
 .btn-login-color{
@@ -49,36 +49,36 @@ body, html {
     background-color: #ff9900;
 }
 .btn-cart {
-    color: white; /* Белый текст */
-    border: none; /* Удаление границы */
-    padding: 8px 12px; /* Внутренний отступ */
-    border-radius: 5px; /* Закругленные углы */
-    transition: background-color 0.3s ease-in-out; /* Эффект наведения */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
 }
 
 .btn-cart:hover {
-    background-color: #ff6600; /* Темнее при наведении */
+    background-color: #ff6600;
 }
 
 .bi-cart {
-    margin-right: 5px; /* Отступ после иконки */
+    margin-right: 5px;
 }
 
 .scroll-menu {
     position: fixed;
-    top: -100px; /* Изначально скрыт */
+    top: -100px;
     width: 100%;
     background-color: #f0f0f0;
     padding: 10px;
     border-bottom: 1px solid #ddd;
     z-index: 1000;
     transition: top 0.3s ease-in-out;
-    display: none; /* Изначально скрыт */
+    display: none;
 }
 
 .scroll-menu.show {
     top: 0;
-    display: block; /* Показываем при появлении */
+    display: block;
 }
 
 .scroll-menu.hide {
@@ -250,7 +250,7 @@ a.footer-text:hover {
     color: #fff;
 }
 .form-control::placeholder {
-    color: #eee; /* почти белый */
+    color: #eee;
     opacity: 1;
 }
 .btn-primary {

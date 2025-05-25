@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
@@ -155,7 +154,6 @@ public class DishesService {
         return dto;
     }
 
-
     public Page<DishesDTO> getAllDishes(int page, int size, Long categoryId, Long typeId) {
         Page<Dishes> dishesPage;
 
@@ -173,7 +171,6 @@ public class DishesService {
 
         return dishesPage.map(this::toDTO);
     }
-
 
     @Transactional
     public void deleteDish(Long dishId) {
@@ -199,7 +196,6 @@ public class DishesService {
         DeletedDishes deletedDish = deletedDishesRepository.findById(deletedDishId)
                 .orElseThrow(() -> new EntityNotFoundException("Удалённое блюдо не найдено"));
 
-        // Создаём новое блюдо на основе данных из DeletedDishes
         Dishes dish = new Dishes();
         dish.setName(deletedDish.getName());
         dish.setPrice(deletedDish.getPrice());
@@ -221,26 +217,6 @@ public class DishesService {
         }
         deletedDishesRepository.deleteById(id);
     }
-
-
-
-
-
-
-
-   /* @Transactional
-    public Dishes createDish(String name, double price, int weight, String imageUrl, String ingredient,
-                             List<String> categoryNames, List<String> typeNames) {
-
-        Set<TypeDishes> categories = loadCategories(categoryNames);
-        Set<Type> types = loadTypes(typeNames);
-
-        Dishes dish = new Dishes(name, price, weight, imageUrl, ingredient, categories, types);
-        return dishesRepository.save(dish);
-    }*/
-
-
-
 
     public void addAllDishes() {
         List<Dishes> dishesList = List.of(

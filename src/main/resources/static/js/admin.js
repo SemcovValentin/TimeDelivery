@@ -63,7 +63,6 @@ async function renderEmployeesTable() {
             });
         });
 
-        // Навешиваем обработчик на кнопки "Добавить..."
         document.getElementById('btnAddEmployee').addEventListener('click', () => {
             renderAddEmployeeForm();
         });
@@ -208,7 +207,6 @@ async function renderAddRoleForm() {
                 </table>
             </div>
 
-            <!-- Правая часть: форма добавления роли -->
             <div style="flex: 1; max-width: 50%;">
                 <h4>Добавить роль</h4>
                 <form id="addRoleForm">
@@ -224,12 +222,10 @@ async function renderAddRoleForm() {
         </div>
     `;
 
-    // Обработчик отмены - возвращаемся к таблице сотрудников
     document.getElementById('btnCancelAddRole').addEventListener('click', () => {
         renderEmployeesTable();
     });
 
-    // Обработчик отправки формы добавления роли
     document.getElementById('addRoleForm').addEventListener('submit', async (event) => {
         event.preventDefault();
 
@@ -283,17 +279,14 @@ async function renderEditEmployeeForm(userId) {
     const adminContent = document.getElementById('adminContent');
 
     try {
-        // Получаем данные сотрудника по ID
         const response = await fetch(`/admin/employees/${userId}`);
         if (!response.ok) throw new Error('Ошибка загрузки данных сотрудника');
         const employee = await response.json();
 
-        // Получаем список ролей для селекта
         const rolesResponse = await fetch('/admin/roles');
         if (!rolesResponse.ok) throw new Error('Ошибка загрузки ролей');
         const allRoles = await rolesResponse.json();
 
-        // Формируем опции селекта с выбранными ролями
         const rolesOptions = allRoles.map(role => {
             const selected = employee.roles.includes(role.name) ? 'selected' : '';
             return `<option value="${role.name}" ${selected}>${role.name.replace('ROLE_', '')}</option>`;
@@ -327,12 +320,10 @@ async function renderEditEmployeeForm(userId) {
             </form>
         `;
 
-        // Обработчик отмены
         document.getElementById('btnCancelEdit').addEventListener('click', () => {
             renderEmployeesTable();
         });
 
-        // Обработчик отправки формы редактирования
         document.getElementById('editEmployeeForm').addEventListener('submit', async (event) => {
             event.preventDefault();
 
@@ -412,7 +403,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
     };
 
-
     // Функция для загрузки и отображения категорий
     window.renderCategoriesDropdown = async function(buttonsContainer) {
         const dropdownMenu = buttonsContainer.querySelector('.btn-group:first-child .dropdown-menu');
@@ -449,12 +439,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             dropdownMenu.innerHTML = '';
 
-            // Добавляем пункт "Все типы" в начало списка
             const allLi = document.createElement('li');
             allLi.innerHTML = `<a class="dropdown-item" href="#" data-type-id="" data-type-name="Все типы">Все типы</a>`;
             dropdownMenu.appendChild(allLi);
 
-            // Добавляем остальные типы
             types.forEach(type => {
                 const li = document.createElement('li');
                 li.innerHTML = `<a class="dropdown-item" href="#" data-type-id="${type.id}" data-type-name="${type.name}">${type.name}</a>`;
@@ -466,7 +454,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Удаляем все старые сообщения с таким текстом
     function renderNoDishesMessage() {
         const oldMessages = Array.from(adminContent.querySelectorAll('p'));
         oldMessages.forEach(p => {
@@ -475,15 +462,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Добавляем новое сообщение
         const empty = document.createElement('p');
         empty.textContent = "Нет блюд для отображения";
         empty.classList.add('text-center', 'my-4'); // для стилизации
         adminContent.appendChild(empty);
     }
 
-
-    // Функция для отрисовки карточек блюд
     function renderCards(dishes) {
         let oldRow = adminContent.querySelector('.row');
         if (oldRow) oldRow.remove();
@@ -544,7 +528,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log('Редактировать блюдо с id:', dishId);
 
                 try {
-                    // Параллельно загружаем блюдо, категории и типы
                     const [dishResponse, categories, types] = await Promise.all([
                         fetch(`/admin/dishes/${dishId}`),
                         fetchCategories(),
@@ -554,7 +537,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (!dishResponse.ok) throw new Error('Ошибка загрузки данных блюда');
                     const dish = await dishResponse.json();
 
-                    // Рендерим форму с переданными данными для редактирования
                     renderAddDishForm(categories, types, dish);
                 } catch (error) {
                     showUniversalToast('Ошибка', 'Не удалось загрузить данные блюда: ' + error.message, 'danger');
@@ -618,7 +600,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         pagination.appendChild(prevLi);
 
-        // Кнопки с номерами страниц
         const maxPagesToShow = 5;
         let startPage = Math.max(0, currentPage - Math.floor(maxPagesToShow / 2));
         let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 1);
@@ -650,7 +631,6 @@ document.addEventListener("DOMContentLoaded", () => {
         adminContent.appendChild(pagination);
     }
 
-    // Навесить вызов на кнопку "Блюда"
     const btnDishes = document.getElementById('btnDishes');
     if (btnDishes) {
         btnDishes.addEventListener('click', () => {
@@ -664,7 +644,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const adminContent = document.getElementById("adminContent");
         adminContent.innerHTML = "";
 
-        // Создаём контейнер с кнопками и фильтрами
         const buttonsContainer = document.createElement('div');
         buttonsContainer.id = 'buttonsContainer';
         buttonsContainer.className = 'mb-4 d-flex gap-3';
@@ -690,7 +669,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         adminContent.appendChild(buttonsContainer);
 
-        // Загружаем категории из API и наполняем dropdown меню
         await window.renderCategoriesDropdown(buttonsContainer);
         await window.renderTypesDropdown(buttonsContainer);
 
@@ -707,7 +685,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-
         initDropdownHandler(buttonsContainer, 1, (target, btn) => {
             selectedCategoryId = target.dataset.categoryId || null;
             btn.textContent = target.dataset.categoryName;
@@ -722,7 +699,6 @@ document.addEventListener("DOMContentLoaded", () => {
             window.loadAndRenderDishes(currentPage);
         });
 
-        // Обработчик кнопки "Добавить блюдо"
         buttonsContainer.querySelector('#btnAddDish').addEventListener('click', async () => {
             const categories = await fetchCategories();
             const types = await fetchTypes();
@@ -744,7 +720,6 @@ document.addEventListener("DOMContentLoaded", () => {
 async function renderCategoriesManagement() {
     const adminContent = document.getElementById('adminContent');
 
-    // Загружаем категории с сервера
     let categories = [];
     try {
         const response = await fetch('/admin/categories');
@@ -755,10 +730,8 @@ async function renderCategoriesManagement() {
         return;
     }
 
-    // Рендерим таблицу и форму
     adminContent.innerHTML = `
         <div class="d-flex gap-4">
-            <!-- Левая часть: таблица категорий -->
             <div style="flex: 1; max-width: 50%;">
                 <h4>Список категорий</h4>
                 <table class="table table-striped">
@@ -783,7 +756,6 @@ async function renderCategoriesManagement() {
                 </table>
             </div>
 
-            <!-- Правая часть: форма добавления категории -->
             <div style="flex: 1; max-width: 50%;">
                 <h4>Добавить категорию</h4>
                 <form id="addCategoryForm">
@@ -804,7 +776,7 @@ async function renderCategoriesManagement() {
         e.preventDefault();
         const categoryNameInput = document.getElementById('categoryName');
         const name = categoryNameInput.value.trim();
-        if (!name) return showUniversalToast('Введите название категории', 'danger');
+        if (!name) return showUniversalToast('Ошибка','Введите название категории', 'danger');
 
         try {
             const response = await fetch('/admin/categories', {
@@ -815,25 +787,22 @@ async function renderCategoriesManagement() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                showUniversalToast(errorData.message || 'Ошибка при добавлении категории', 'danger');
+                showUniversalToast(errorData.message ||'Ошибка', 'Ошибка при добавлении категории', 'danger');
                 return;
             }
 
-            // Успешно добавлено - обновляем список категорий
             renderCategoriesManagement();
 
         } catch (error) {
-            showUniversalToast('Ошибка сети: ' + error.message, 'danger');
+            showUniversalToast('Ошибка', 'Ошибка сети: ' + error.message, 'danger');
         }
     });
 
-    // Обработчик кнопки отмены (очищаем форму)
     const btnCancel = document.getElementById('btnCancelAddCategory');
     btnCancel.addEventListener('click', () => {
         addCategoryForm.reset();
     });
 
-    // Обработчики удаления категорий
     adminContent.querySelectorAll('.btn-delete-category').forEach(button => {
         button.addEventListener('click', async (e) => {
             const tr = e.target.closest('tr');
@@ -846,13 +815,13 @@ async function renderCategoriesManagement() {
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
-                    showUniversalToast(errorData.message || 'Ошибка при удалении категории', 'danger');
+                    showUniversalToast(errorData.message ||'Ошибка', 'Ошибка при удалении категории', 'danger');
                     return;
                 }
                 // Успешно удалено - обновляем список
                 renderCategoriesManagement();
             } catch (error) {
-                showUniversalToast('Ошибка сети: ' + error.message, 'danger');
+                showUniversalToast('Ошибка','Ошибка сети: ' + error.message, 'danger');
             }
         });
     });
@@ -885,7 +854,6 @@ async function renderTypesManagement() {
 
     adminContent.innerHTML = `
         <div class="d-flex gap-4">
-            <!-- Левая часть: таблица типов -->
             <div style="flex: 1; max-width: 50%;">
                 <h4>Список типов</h4>
                 <table class="table table-striped">
@@ -910,7 +878,6 @@ async function renderTypesManagement() {
                 </table>
             </div>
 
-            <!-- Правая часть: форма добавления типа -->
             <div style="flex: 1; max-width: 50%;">
                 <h4>Добавить тип</h4>
                 <form id="addTypeForm">
@@ -946,7 +913,6 @@ async function renderTypesManagement() {
                 return;
             }
 
-            // Успешно добавлено - обновляем список типов
             renderTypesManagement();
 
         } catch (error) {
@@ -954,7 +920,6 @@ async function renderTypesManagement() {
         }
     });
 
-    // Обработчик кнопки отмены (очищаем форму)
     const btnCancel = document.getElementById('btnCancelAddType');
     btnCancel.addEventListener('click', () => {
         addTypeForm.reset();
@@ -1181,8 +1146,8 @@ async function submitAddDishForm() {
         return false;
     }
 }
-//Редактирование блюд
 
+//Редактирование блюд
 async function submitEditDishForm(dishId) {
     const form = document.getElementById('addDishForm');
     if (!form) {
@@ -1228,13 +1193,11 @@ async function submitEditDishForm(dishId) {
     }
 }
 
-
 //отрисовка удалённых карточек
 window.loadAndRenderDeletedDishes = async function() {
     const adminContent = document.getElementById('adminContent');
     adminContent.innerHTML = '';
 
-    // Создаём контейнер для карточек удалённых блюд
     const deletedDishesContainer = document.createElement('div');
     deletedDishesContainer.id = 'deletedDishesContainer';
     adminContent.appendChild(deletedDishesContainer);
@@ -1276,7 +1239,6 @@ window.renderDeletedCards = function(dishes, container) {
         container.appendChild(noData);
         return;
     }
-
 
     const row = document.createElement('div');
     row.className = 'row row-cols-1 row-cols-md-3 g-4';

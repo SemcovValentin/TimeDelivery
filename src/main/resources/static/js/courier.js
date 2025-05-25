@@ -1,10 +1,8 @@
 document.getElementById('btnOrders').addEventListener('click', () => {
     loadCourierOrdersByUser();
-   /* renderCourierOrdersTable();*/
 });
 document.addEventListener('DOMContentLoaded', () => {
     loadCourierOrdersByUser();
-    /*renderCourierOrdersTable();*/
 });
 
 let currentStatusFilter = '';
@@ -71,7 +69,7 @@ async function renderCourierOrdersTable(courierId) {
                         <th>Сумма</th>
                         <th>Адрес</th>
                         <th>Комментарий к заказу</th>
-                        <!--<th>Действие</th>-->
+                        <th>Действие</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,7 +134,6 @@ async function renderCourierOrdersTable(courierId) {
     }
 }
 
-// Функция для отображения читаемого названия статуса
 function getStatusLabel(status) {
     switch (status) {
         case 'ON_THE_WAY': return 'Принятые';
@@ -146,7 +143,7 @@ function getStatusLabel(status) {
     }
 }
 
-// Функция для экранирования HTML (безопасное отображение комментариев)
+// Функция для экранирования HTML
 function escapeHtml(text) {
     if (!text) return '';
     return text.replace(/[&<>"']/g, m => ({

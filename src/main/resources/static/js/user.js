@@ -26,10 +26,7 @@ function showUniversalToast(title, message, type = 'success') {
     setTimeout(() => toast.hide(), 5000);
 }
 
-// Например, если client.name хранится в localStorage:
 document.getElementById('clientName').textContent = localStorage.getItem('clientName') || 'Имя пользователя';
-
-// Или если получаете с сервера:
 fetch('/timeDelivery/me', {
     headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
 })
@@ -43,19 +40,15 @@ fetch('/timeDelivery/me', {
 document.getElementById('logoutBtn').addEventListener('click', async function (e) {
     e.preventDefault();
     try {
-        // Вызов серверного logout для удаления httpOnly cookie
         await fetch('/timeDelivery/logout', {method: 'POST', credentials: 'include'});
     } catch (err) {
-        // Можно обработать ошибку, если нужно
         console.error('Ошибка при выходе:', err);
     }
-    // Очищаем localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('roles');
     localStorage.removeItem('clientName');
     localStorage.removeItem('cart');
     localStorage.removeItem('cartComment');
-    // На всякий случай пробуем удалить jwt-куку на клиенте
     document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.href = '/timeDelivery/';
 });
@@ -142,7 +135,6 @@ document.getElementById('userEditForm').addEventListener('submit', async functio
         showUniversalToast('Успех', 'Данные успешно обновлены', 'success');
         bootstrap.Offcanvas.getInstance(document.getElementById('offcanvasUserEdit')).hide();
 
-        // Очистка паролей после успешного обновления
         document.getElementById('userPasswordCurrent').value = '';
         document.getElementById('userPasswordNew').value = '';
         document.getElementById('userPasswordNewCheck').value = '';
@@ -152,7 +144,7 @@ document.getElementById('userEditForm').addEventListener('submit', async functio
 });
 
 
-// --- Форма редактирования личных данных ---
+//Форма редактирования личных данных
 document.getElementById('offcanvasClientEdit').addEventListener('show.bs.offcanvas', async () => {
     try {
         const token = localStorage.getItem('token');
@@ -230,15 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!cartModalEl) return;
 
     cartModalEl.addEventListener('hidden.bs.modal', () => {
-        // Удаляем все "залипшие" backdrop
         document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
 
-        // Снимаем фокус с активного элемента внутри модалки (если остался)
         if (document.activeElement instanceof HTMLElement && cartModalEl.contains(document.activeElement)) {
             document.activeElement.blur();
         }
-
-        // Возвращаем фокус на кнопку открытия корзины
         if (cartBtn) {
             cartBtn.focus();
         }
@@ -254,7 +242,6 @@ async function loadAndRenderUserOrders(userOrders) {
     const allDishes = await loadAllDishes();
     renderUserOrdersTable(userOrders, allDishes);
 }
-
 
 // Функция для рендера таблицы заказов пользователя
 function renderUserOrdersTable(userOrders, allDishes) {
@@ -399,7 +386,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-//обновление статуса заказа
 const statusLabels = {
     ACCEPTED: 'Заказ принят',
     PROCESSING: 'Заказ в обработке',
@@ -430,7 +416,6 @@ async function updateUserOrderStatuses() {
     }
 }
 
-// Запускаем обновление статусов каждые 10 секунд
 setInterval(updateUserOrderStatuses, 10000);
 
 

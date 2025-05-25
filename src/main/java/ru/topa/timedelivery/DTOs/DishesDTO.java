@@ -1,7 +1,6 @@
 package ru.topa.timedelivery.DTOs;
 
 import lombok.Data;
-import ru.topa.timedelivery.entities.catalog.Dishes;
 import ru.topa.timedelivery.entities.catalog.Type;
 import ru.topa.timedelivery.entities.catalog.TypeDishes;
 

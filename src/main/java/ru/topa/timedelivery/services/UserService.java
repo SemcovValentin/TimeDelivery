@@ -1,6 +1,5 @@
 package ru.topa.timedelivery.services;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -61,7 +60,6 @@ public class UserService {
             throw new ForbiddenOperationException("Удаление данного пользователя запрещено");
         }
 
-        // Очистить связь с Client
         Optional<Client> clientOpt = clientRepository.findByUser(user);
 
         if (clientOpt.isPresent()) {
@@ -70,7 +68,6 @@ public class UserService {
             clientRepository.delete(client);
         }
 
-        // Очистить ссылки courier у заказов, если нужно
         List<Order> orders = orderRepository.findAllByCourier(user);
         for (Order order : orders) {
             order.setCourier(null);
@@ -79,9 +76,6 @@ public class UserService {
 
         userRepository.delete(user);
     }
-
-
-
 
     @Value("${default.user.password}")
     private String defaultUserPassword;
@@ -118,15 +112,12 @@ public class UserService {
     }
 
     public boolean updateUserWithPasswordCheck(User user, UserDTO req) {
-        // Проверяем текущий пароль
         if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
             return false;
         }
-        // Меняем телефон
         if (req.getPhone() != null) {
             user.setName(req.getPhone());
         }
-        // Меняем пароль, если новый задан
         if (req.getNewPassword() != null && !req.getNewPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         }
@@ -140,12 +131,10 @@ public class UserService {
 
         Client client = user.getClient();
 
-        // Проверка уникальности телефона
         if (!user.getName().equals(dto.getPhone()) && userRepository.findByName(dto.getPhone()).isPresent()) {
             throw new DataConflictException("Пользователь с таким телефоном уже существует");
         }
 
-        // Проверка уникальности email
         if (client != null && !dto.getEmail().equalsIgnoreCase(client.getEmail())) {
             Optional<Client> clientWithEmail = clientRepository.findByEmail(dto.getEmail());
             if (clientWithEmail.isPresent() && !clientWithEmail.get().getId().equals(client.getId())) {
@@ -153,17 +142,14 @@ public class UserService {
             }
         }
 
-        // Обновляем пользователя
         user.setName(dto.getPhone());
 
-        // Обновляем роли
         Set<Role> roles = dto.getRoles().stream()
                 .map(roleName -> roleRepository.findByName(roleName)
                         .orElseThrow(() -> new RuntimeException("Роль не найдена: " + roleName)))
                 .collect(Collectors.toSet());
         user.setRoles(roles);
 
-        // Обновляем или создаём клиента
         if (client == null) {
             client = new Client();
             client.setUser(user);
@@ -194,6 +180,18 @@ public class UserService {
             super(message);
         }
     }
+    public static class DuplicateEmailException extends RuntimeException {
+        public DuplicateEmailException(String message) {
+            super(message);
+        }
+    }
+
+    public static class DuplicatePhoneException extends RuntimeException {
+        public DuplicatePhoneException(String message) {
+            super(message);
+        }
+    }
+
 
     public Page<ClientDTO> getClients(int page, int size, String sortBy, String direction) {
         Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;

@@ -55,7 +55,7 @@
 }
 
 .form-control::placeholder {
-    color: #eee; /* почти белый */
+    color: #eee;
     opacity: 1;
 }
 

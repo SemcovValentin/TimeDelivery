@@ -45,7 +45,6 @@ public class UserController {
         }
     }
 
-
     @PutMapping("/updateClient")
     public ResponseEntity<?> updateClient(@RequestBody @Valid ClientDTO updateRequest,
                                           Authentication authentication) {

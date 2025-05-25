@@ -9,198 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ////////////////////////////////////////////////////////////////////////////////////
 //создание таблицы заказов
-/*const adminContent = document.getElementById('adminContent');
-const pageSize = 10;
-let currentPage = 0;
-let totalPages = 0;
-
-async function renderOrdersTable(page = 0) {
-    if (!adminContent) return;
-
-    try {
-        const [ordersPage, couriers] = await Promise.all([
-            fetch(`/moderator/orders?page=${page}&size=${pageSize}`).then(res => res.json()),
-            fetch('/moderator/couriers').then(res => res.json()),
-        ]);
-
-        currentPage = page;
-        totalPages = ordersPage.totalPages;
-        const orders = ordersPage.content;
-
-        // Очищаем контейнер и создаём каркас таблицы и пагинации
-        adminContent.innerHTML = `
-            <h4>Заказы</h4>
-            <table class="table table-striped" id="ordersTable">
-                <thead>
-                    <tr>
-                        <th>Номер</th>
-                        <th>Время</th>
-                        <th>Телефон</th>
-                        <th>Имя</th>
-                        <th>Сумма</th>
-                        <th>Адрес</th>
-                    </tr>
-                </thead>
-                <tbody id="ordersTableBody"></tbody>
-            </table>
-            <nav>
-                <ul class="pagination justify-content-center">
-                    <li class="page-item ${page === 0 ? 'disabled' : ''}">
-                        <button class="page-link" id="prevPage">Предыдущая</button>
-                    </li>
-                    <li class="page-item disabled">
-                        <span class="page-link">Страница ${page + 1} из ${totalPages}</span>
-                    </li>
-                    <li class="page-item ${page + 1 >= totalPages ? 'disabled' : ''}">
-                        <button class="page-link" id="nextPage">Следующая</button>
-                    </li>
-                </ul>
-            </nav>
-        `;
-
-        const tbody = document.getElementById('ordersTableBody');
-
-        orders.forEach(order => {
-            // 1. Основная строка
-            const trMain = document.createElement('tr');
-            [
-                order.id,
-                new Date(order.createdAt || order.orderTime).toLocaleString(),
-                order.client?.phone || '—',
-                order.client?.name || '—',
-                order.totalAmount ? `${order.totalAmount} руб.` : '—',
-                order.client?.address || '—'
-            ].forEach(text => {
-                const td = document.createElement('td');
-                td.textContent = text;
-                trMain.appendChild(td);
-            });
-            tbody.appendChild(trMain);
-
-            // 2. Строка со значениями: комментарий, курьер, статус
-            const trValues = document.createElement('tr');
-
-            // Комментарий
-            const tdComment = document.createElement('td');
-            tdComment.colSpan = 3;
-            tdComment.textContent = order.comment && order.comment.trim() !== '' ? order.comment : '—';
-            tdComment.style.fontStyle = 'italic';
-            tdComment.style.whiteSpace = 'normal';
-            tdComment.style.wordBreak = 'break-word';
-            tdComment.style.textAlign = 'left';
-
-            trValues.appendChild(tdComment);
-
-            // Курьер
-            const tdCourier = document.createElement('td');
-            const selectCourier = document.createElement('select');
-            tdCourier.colSpan = 1;
-            selectCourier.className = 'form-select form-select-sm';
-            selectCourier.style.minWidth = '150px';
-
-            const emptyOption = document.createElement('option');
-            emptyOption.value = '';
-            emptyOption.textContent = 'Выбери курьера';
-            selectCourier.appendChild(emptyOption);
-
-            couriers.forEach(courier => {
-                const option = document.createElement('option');
-                option.value = courier.id;
-                option.textContent = courier.clientName || courier.name || 'Без имени';
-                if (order.courierId === courier.id) option.selected = true;
-                selectCourier.appendChild(option);
-            });
-
-            selectCourier.addEventListener('change', async () => {
-                try {
-                    await fetch(`/moderator/orders/${order.id}/assign-courier`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({courierId: selectCourier.value || null})
-                    });
-                    showUniversalToast('Успех', 'Курьер назначен', 'success');
-                } catch {
-                    showUniversalToast('Ошибка', 'Не удалось назначить курьера', 'danger');
-                }
-            });
-
-            tdCourier.appendChild(selectCourier);
-            trValues.appendChild(tdCourier);
-
-            // Статус (радио-кнопки)
-            const tdStatus = document.createElement('td');
-            tdStatus.colSpan = 2;
-            tdStatus.appendChild(createStatusRadioGroup2x2(order));
-            trValues.appendChild(tdStatus);
-
-            tbody.appendChild(trValues);
-        });
-
-        // Пагинация — обработчики кнопок
-        document.getElementById('prevPage').addEventListener('click', () => {
-            if (currentPage > 0) renderOrdersTable(currentPage - 1);
-        });
-
-        document.getElementById('nextPage').addEventListener('click', () => {
-            if (currentPage + 1 < totalPages) renderOrdersTable(currentPage + 1);
-        });
-
-    } catch (error) {
-        adminContent.innerHTML = `<p class="text-danger">Ошибка загрузки заказов: ${error.message}</p>`;
-    }
-}
-
-// Радио-кнопки для статуса заказа
-function createStatusRadioGroup2x2(order) {
-    const statuses = [
-        {id: 'ACCEPTED', label: 'Заказ принят'},
-        {id: 'PROCESSING', label: 'Заказ в обработке'},
-        {id: 'ON_THE_WAY', label: 'Курьер выехал'},
-        {id: 'DELIVERED', label: 'Заказ доставлен'}
-    ];
-
-    const uniqueSuffix = Math.random().toString(36).substring(2, 8);
-    const container = document.createElement('div');
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = '1fr 1fr';
-    container.style.gap = '4px';
-    container.style.minWidth = '300px';
-
-    statuses.forEach(status => {
-        const input = document.createElement('input');
-        input.type = 'radio';
-        input.className = 'btn-check';
-        input.name = `status-${order.id}-${uniqueSuffix}`;
-        input.id = `status-${order.id}-${status.id}-${uniqueSuffix}`;
-        input.autocomplete = 'off';
-        input.value = status.id;
-        input.checked = order.status === status.id;
-
-        input.addEventListener('change', async () => {
-            try {
-                await fetch(`/moderator/orders/${order.id}/update-status`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({status: status.id})
-                });
-                showUniversalToast('Успех', `Статус изменён на "${status.label}"`, 'success');
-            } catch (e) {
-                showUniversalToast('Ошибка', 'Не удалось изменить статус', 'danger');
-            }
-        });
-
-        const label = document.createElement('label');
-        label.className = 'btn btn-outline-danger';
-        label.setAttribute('for', input.id);
-        label.textContent = status.label;
-        label.style.color = 'black';
-
-        container.appendChild(input);
-        container.appendChild(label);
-    });
-
-    return container;
-}*/
 const adminContent = document.getElementById('adminContent');
 const pageSize = 10;
 let currentPage = 0;
@@ -211,7 +19,6 @@ async function renderOrdersTable(page = 0) {
     if (!adminContent) return;
 
     try {
-        // Формируем параметры запроса с учетом фильтра статуса
         const queryParams = new URLSearchParams({
             page,
             size: pageSize,
@@ -229,7 +36,6 @@ async function renderOrdersTable(page = 0) {
         totalPages = ordersPage.totalPages;
         const orders = ordersPage.content;
 
-        // Вставляем фильтр и таблицу
         adminContent.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Заказы</h4>
@@ -275,10 +81,8 @@ async function renderOrdersTable(page = 0) {
         </nav>
         `;
 
-        // Заполнение таблицы
         const tbody = document.getElementById('ordersTableBody');
         orders.forEach(order => {
-            // Основная строка
             const trMain = document.createElement('tr');
             [
                 order.id,
@@ -294,10 +98,8 @@ async function renderOrdersTable(page = 0) {
             });
             tbody.appendChild(trMain);
 
-            // Строка с комментарием, курьером и статусом
             const trValues = document.createElement('tr');
 
-            // Комментарий (colSpan=3)
             const tdComment = document.createElement('td');
             tdComment.colSpan = 3;
             tdComment.textContent = order.comment && order.comment.trim() !== '' ? order.comment : '—';
@@ -307,7 +109,6 @@ async function renderOrdersTable(page = 0) {
             tdComment.style.textAlign = 'left';
             trValues.appendChild(tdComment);
 
-            // Курьер
             const tdCourier = document.createElement('td');
             const selectCourier = document.createElement('select');
             selectCourier.className = 'form-select form-select-sm';
@@ -342,7 +143,6 @@ async function renderOrdersTable(page = 0) {
             tdCourier.appendChild(selectCourier);
             trValues.appendChild(tdCourier);
 
-            // Статус (радио-кнопки)
             const tdStatus = document.createElement('td');
             tdStatus.colSpan = 2;
             tdStatus.appendChild(createStatusRadioGroup2x2(order));
@@ -351,7 +151,6 @@ async function renderOrdersTable(page = 0) {
             tbody.appendChild(trValues);
         });
 
-        // Обработчики пагинации
         document.getElementById('prevPage').addEventListener('click', () => {
             if (currentPage > 0) renderOrdersTable(currentPage - 1);
         });
@@ -364,15 +163,10 @@ async function renderOrdersTable(page = 0) {
         document.querySelectorAll('#statusFilterMenu .dropdown-item').forEach(item => {
             item.addEventListener('click', e => {
                 e.preventDefault();
-                // Снимаем active со всех
                 document.querySelectorAll('#statusFilterMenu .dropdown-item').forEach(i => i.classList.remove('active'));
-                // Активируем выбранный
                 item.classList.add('active');
-                // Обновляем кнопку
                 document.getElementById('statusFilterBtn').textContent = `Статус: ${item.textContent.trim()}`;
-                // Меняем фильтр
                 currentStatusFilter = item.dataset.status;
-                // Перезагружаем таблицу с новым фильтром на первой странице
                 renderOrdersTable(0);
             });
         });
@@ -432,7 +226,6 @@ function createStatusRadioGroup2x2(order) {
                 showUniversalToast('Ошибка', 'Не удалось изменить статус', 'danger');
             }
         });
-
 
         const label = document.createElement('label');
         label.className = 'btn btn-outline-danger';
@@ -510,7 +303,6 @@ async function renderClientsTable(page = 0, sortBy = 'id', direction = 'asc') {
             th.addEventListener('click', () => {
                 const clickedSortBy = th.getAttribute('data-sort');
                 if (currentSortBy === clickedSortBy) {
-                    // Переключаем направление
                     currentDirection = currentDirection === 'asc' ? 'desc' : 'asc';
                 } else {
                     currentSortBy = clickedSortBy;
@@ -520,7 +312,6 @@ async function renderClientsTable(page = 0, sortBy = 'id', direction = 'asc') {
             });
         });
 
-        // Пагинация
         document.getElementById('prevPage').addEventListener('click', () => {
             if (currentPage > 0) {
                 currentPage--;
@@ -542,7 +333,6 @@ async function renderClientsTable(page = 0, sortBy = 'id', direction = 'asc') {
     }
 }
 
-// Навешиваем загрузку клиентов на кнопку
 document.getElementById('btnClients').addEventListener('click', () => {
     renderClientsTable(0, currentSortBy, currentDirection);
 });

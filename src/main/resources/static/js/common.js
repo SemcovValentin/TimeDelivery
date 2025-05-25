@@ -37,7 +37,6 @@ function showUniversalToast(title, message, type = 'success') {
     const toastBody = toastEl.querySelector('.toast-body');
     const toastHeader = toastEl.querySelector('.toast-header');
 
-    // Сброс и установка классов для цвета
     toastEl.classList.remove('bg-success', 'bg-info', 'bg-warning', 'bg-danger');
     toastHeader.classList.remove('bg-success', 'bg-info', 'bg-warning', 'bg-danger');
     toastEl.classList.add('bg-' + type);
@@ -52,7 +51,6 @@ function showUniversalToast(title, message, type = 'success') {
     setTimeout(() => toast.hide(), 5000);
 }
 
-//модальное окно для вызова не зарегистрированным пользователем
 function showAuthRequiredModal() {
     const modalEl = document.getElementById('authRequiredModal');
     const modal = new bootstrap.Modal(modalEl, {
@@ -72,7 +70,6 @@ if (carouselIndicators) {
             const carouselInner = document.getElementById('carouselInner');
             const carouselIndicators = document.getElementById('carouselIndicators');
 
-            // Создание индикаторов
             images.forEach((image, index) => {
                 const indicator = document.createElement('button');
                 indicator.type = 'button';
@@ -85,7 +82,6 @@ if (carouselIndicators) {
                 carouselIndicators.appendChild(indicator);
             });
 
-            // Создание изображений в карусели
             images.forEach((image, index) => {
                 const carouselItem = document.createElement('div');
                 carouselItem.classList.add('carousel-item');
@@ -131,8 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
     const searchInput = document.getElementById("catalogSearchInput") || document.getElementById("searchInput");
-
-    // Получить параметр из URL
     function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param) || '';
@@ -189,7 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 cart[dishId] = (cart[dishId] || 0) + 1;
                 localStorage.setItem('cart', JSON.stringify(cart));
 
-                // Обновляем бейдж
                 const badge = this.querySelector('.cart-count');
                 badge.style.display = 'inline-block';
                 badge.textContent = cart[dishId] > 99 ? '99+' : cart[dishId];
@@ -214,8 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const searchValue = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
         let filtered = allDishes;
-
-        // Фильтрация по категории из URL
         const categoryParam = getQueryParam("category");
         if (categoryParam) {
             const currentCategory = categoryParam.toLowerCase();
@@ -225,7 +216,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // Фильтрация по поиску
         if (searchValue) {
             filtered = filtered.filter(dish => dish.name.toLowerCase().includes(searchValue));
         } else {
@@ -235,7 +225,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Фильтрация по выбранным типам
         if (unselectedTypes.length > 0) {
             filtered = filtered.filter(dish => {
                 if (!dish.types || dish.types.length === 0) return false;
@@ -246,7 +235,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderCards(filtered);
     }
 
-    // Функция debounce для оптимизации поиска
     function debounce(fn, delay) {
         let timeoutId;
         return function (...args) {
@@ -262,13 +250,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Подставляем параметр query в поле поиска, если есть
     const initialQuery = getQueryParam('query');
     if (initialQuery && searchInput) {
         searchInput.value = initialQuery;
     }
 
-    // Загружаем все блюда
     loadAllDishes()
         .then(() => {
             initTypeFilters();
@@ -276,7 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(error => console.error("Ошибка при загрузке данных:", error));
 
-    // Навешиваем debounce на поле поиска
     if (searchInput) {
         const debouncedFilter = debounce(filterDishes, 300);
         searchInput.addEventListener("input", debouncedFilter);
@@ -284,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////
-//scroll menu, которая следует за экраном
+//scroll menu
 document.addEventListener('DOMContentLoaded', () => {
     const scrollMenu = document.querySelector(".scroll-menu");
     if (!scrollMenu) return;
@@ -295,14 +280,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let scrollTop = window.scrollY;
 
         if (scrollTop > lastScrollTop) {
-            // Прокрутка вниз
             if (scrollTop > 150) {
                 scrollMenu.style.display = "block";
                 scrollMenu.classList.remove("hide");
                 scrollMenu.classList.add("show");
             }
         } else {
-            // Прокрутка вверх
             if (scrollTop < 150) {
                 scrollMenu.classList.remove("show");
                 scrollMenu.classList.add("hide");
@@ -313,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
         lastScrollTop = scrollTop;
     });
 });
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
@@ -379,7 +361,6 @@ function renderCartTable(dishes) {
         return;
     }
 
-    // Получить сохранённый комментарий, если есть
     const savedComment = localStorage.getItem('cartComment') || '';
 
     document.getElementById('cartTableContainer').innerHTML = `
@@ -495,8 +476,6 @@ if (cartModal) {
     });
 }
 
-
-
 //обновления бейджей на карточках
 function updateCardBadges() {
     const cart = JSON.parse(localStorage.getItem('cart') || '{}');
@@ -520,7 +499,6 @@ if (submitOrderBtn) {
         const cart = JSON.parse(localStorage.getItem('cart') || '{}');
         const comment = document.getElementById('cartComment')?.value || '';
 
-        // Асинхронно проверяем авторизацию
         if (!(await userIsAuthorized())) {
             showAuthRequiredModal();
             return;
@@ -531,7 +509,6 @@ if (submitOrderBtn) {
             return;
         }
 
-        // Проверяем наличие блюд
         const dishIds = Object.keys(cart);
         const missingDishes = dishIds.filter(id => !allDishes.find(d => d.id == id));
         if (missingDishes.length > 0) {
@@ -570,7 +547,6 @@ if (submitOrderBtn) {
 
             const data = await response.json();
 
-            // Успешно оформили заказ
             localStorage.removeItem('cart');
             localStorage.removeItem('cartComment');
             renderCartTable(allDishes);

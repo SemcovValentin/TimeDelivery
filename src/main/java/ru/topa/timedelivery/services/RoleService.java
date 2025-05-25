@@ -1,6 +1,5 @@
 package ru.topa.timedelivery.services;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import ru.topa.timedelivery.DTOs.RoleDTO;
@@ -38,12 +37,10 @@ public class RoleService {
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Роль не найдена"));
 
-        // Запрет на удаление системных ролей
         if ("ROLE_USER".equals(role.getName()) || "ROLE_ADMIN".equals(role.getName())) {
             throw new ForbiddenOperationException("Удаление системных ролей запрещено");
         }
 
-        // Проверяем, используется ли роль у пользователей
         boolean isRoleUsed = userRepository.existsByRoles(role);
         if (isRoleUsed) {
             throw new DataConflictException("Роль используется у пользователей и не может быть удалена");

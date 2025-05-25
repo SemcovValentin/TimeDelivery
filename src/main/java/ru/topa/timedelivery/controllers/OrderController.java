@@ -65,7 +65,6 @@ public class OrderController {
         return ResponseEntity.ok(dtos);
     }
 
-
     @PostMapping("/{orderId}/update-status")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Long orderId, @RequestBody Map<String, String> body) {
         String newStatus = body.get("status");
@@ -80,6 +79,5 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Internal error"));
         }
     }
-
 
 }

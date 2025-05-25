@@ -81,7 +81,6 @@ public class OrderService {
                 .map(this::toOrderItemDTO)
                 .collect(Collectors.toList());
 
-        // Глубокое копирование, если OrderItemDTO содержит коллекции
         List<OrderItemDTO> safeItems = new ArrayList<>();
         for (OrderItemDTO item : originalItems) {
             OrderItemDTO copy = new OrderItemDTO();
@@ -183,7 +182,6 @@ public class OrderService {
         });
     }
 
-
     public List<CourierDTO> getAllCouriers() {
         List<User> couriers = userRepository.findAllByRoles_Name("ROLE_COURIER");
         return couriers.stream()
@@ -195,7 +193,6 @@ public class OrderService {
                 })
                 .collect(Collectors.toList());
     }
-
 
     @Transactional
     public void assignCourier(Long orderId, Long courierId) {

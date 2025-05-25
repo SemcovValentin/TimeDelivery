@@ -3,7 +3,6 @@ package ru.topa.timedelivery.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.topa.timedelivery.entities.catalog.Type;
-import ru.topa.timedelivery.entities.catalog.TypeDishes;
 import ru.topa.timedelivery.repositories.DishesRepository;
 import ru.topa.timedelivery.repositories.TypeRepository;
 

@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Очистка номера телефона - оставляем только + и цифры
 function cleanPhone(phone) {
     return phone.replace(/[^+0-9]/g, '');
 }
@@ -75,7 +74,6 @@ function updateLoginButton(clientName, roles) {
     };
 }
 
-
 // Перенаправление по роли
 function redirectByRole(roles) {
     console.log('redirectByRole roles:', roles);
@@ -92,14 +90,10 @@ function redirectByRole(roles) {
     window.location.href = routes[highestRole];
 }
 
-
-// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    // Инициализируем маски телефонов
     initPhoneMask('loginPhone');
     initPhoneMask('registerPhone');
 
-    // Переключение вкладок
     document.getElementById('loginTab').addEventListener('click', () => switchForm('login'));
     document.getElementById('registerTab').addEventListener('click', () => switchForm('register'));
 
@@ -172,8 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
         })
-            .then(res => {
-                if (!res.ok) throw new Error('Ошибка регистрации');
+            .then(async res => {
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(errorText || 'Ошибка регистрации');
+                }
                 return res.text();
             })
             .then(text => {
@@ -183,9 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(text);
             })
             .catch(err => {
-                showUniversalToast('Ошибка', 'Не удалось зарегистрироваться', 'danger');
+                showUniversalToast('Ошибка', err.message, 'danger');
                 console.error(err);
             });
+
     });
 
     // Обработка формы входа
@@ -233,13 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 document.getElementById('authModalLoginBtn').addEventListener('click', () => {
-    // Закрываем модальное окно авторизации
     const authModalEl = document.getElementById('authRequiredModal');
     const authModalInstance = bootstrap.Modal.getInstance(authModalEl);
     if (authModalInstance) {
         authModalInstance.hide();
     }
-    // Закрываем модальное окно корзины, если открыто
     const cartModalEl = document.getElementById('cartModal');
     const cartModalInstance = bootstrap.Modal.getInstance(cartModalEl);
     if (cartModalInstance) {

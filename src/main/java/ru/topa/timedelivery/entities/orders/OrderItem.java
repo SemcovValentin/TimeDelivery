@@ -27,7 +27,6 @@ public class OrderItem {
     @JoinColumn(name = "dish_id", nullable = false)
     private Dishes dish;
 
-
     @Positive
     private Integer quantity;
 
