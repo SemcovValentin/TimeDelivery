@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Delivery - Доставка еды</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+    <link rel="stylesheet" th:href="@{/styles/deliveryS.css}" />
+</head>
+
+<body>
+<header class="hed d-flex align-items-center justify-content-between bg-light border-bottom px-4 py-2">
+    <a href="/timeDelivery/">
+        <img class="logo" src="/photos/Logo.png" alt="logotype">
+    </a>
+    <div class="info d-flex flex-column gap-2">
+        <span>Среднее время доставки <span class="orange-text">67 мин.</span></span>
+        <span>Оценка качества <span class="orange-text">4.99</span>⭐</span>
+    </div>
+    <div class="contacts d-flex align-items-center gap-4">
+        <div>📞</div>
+        <div class="d-flex flex-column">
+            <span>+7 (978) 999-99-99</span>
+            <span>+7 (978) 555-55-55</span>
+        </div>
+        <button id="loginBtn" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+            Вход
+        </button>
+
+        <a href="#" class="btn btn-cart btn-cart-color btn-sm cart-btn position-relative">
+            <i class="bi bi-cart"></i>КОРЗИНА
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" style="display:none;">
+        0
+        <span class="visually-hidden">товаров в корзине</span>
+    </span>
+        </a>
+    </div>
+
+    <!-- Модальное окно корзины -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background-color: #222; color: #eee;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cartModalLabel">Ваш заказ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartTableContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="submitOrderBtn" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
+                        Оформить заказ
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для сообщения об авторизации -->
+    <div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authRequiredModalLabel">Требуется авторизация</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    Для оформления заказа нужна авторизация!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal" id="authModalOkBtn">Ок</button>
+                    <button id="authModalLoginBtn" class="btn btn-outline-warning" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                        Войти
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightLabel">Авторизация</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="auth-switcher mb-4">
+                <div class="btn-group w-100">
+                    <button type="button" class="btn btn-primary active" id="loginTab">Вход</button>
+                    <button type="button" class="btn btn-outline-primary" id="registerTab">Регистрация</button>
+                </div>
+            </div>
+
+            <!-- Форма входа -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group mb-3">
+                    <label for="loginPhone">Номер телефона:</label>
+                    <input type="text" class="form-control" id="loginPhone" placeholder="+7 (XXX) XXX-XX-XX" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="loginPassword">Пароль:</label>
+                    <input type="password" class="form-control" id="loginPassword" placeholder="Введите пароль" minlength="6" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Войти</button>
+            </form>
+
+            <!-- Форма регистрации -->
+            <form id="registerForm" class="auth-form d-none">
+                <div class="form-group mb-3">
+                    <label for="registerName">Имя:</label>
+                    <input type="text" class="form-control" id="registerName" placeholder="Введите ваше имя" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="registerEmail">Email:</label>
+                    <input type="email" class="form-control" id="registerEmail" placeholder="Введите ваш email" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="registerPhone">Номер телефона:</label>
+                    <input type="text" class="form-control" id="registerPhone" placeholder="+7 (XXX) XXX-XX-XX" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="registerPassword">Пароль:</label>
+                    <input type="password" class="form-control" id="registerPassword" placeholder="Введите пароль" minlength="6" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="registerConfirm">Повторите пароль:</label>
+                    <input type="password" class="form-control" id="registerConfirm" placeholder="Повторите пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="universalToast"
+         class="toast align-items-center text-white bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-3"
+         role="alert"
+         aria-live="assertive" aria-atomic="true" style="min-width: 250px; z-index: 1080;">
+        <div class="toast-header bg-success text-white">
+            <strong class="me-auto toast-title">Заголовок</strong>
+            <button type="button" class="btn-close btn-close-white ms-2 mb-1" data-bs-dismiss="toast"
+                    aria-label="Закрыть"></button>
+        </div>
+        <div class="toast-body toast-body">
+            Сообщение
+        </div>
+    </div>
+
+</header>
+
+<!--категории блюд из бд-->
+<nav class="menu d-flex justify-content-center gap-3 mt-3">
+    <th:block th:each="category : ${categories}">
+        <a th:href="@{'/timeDelivery/catalogs/?category=' + ${category.name}}"
+           class="menu-item"
+           th:text="${category.name.toUpperCase()}"></a>
+    </th:block>
+</nav>
+
+
+<div class="scroll-menu bg-light border-bottom fixed-top" style="display: none;">
+    <div class="container">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-auto">
+                <a class="navbar-brand" href="#">
+                    <img class="logo" src="/photos/Logo.png" alt="logotype">
+                </a>
+            </div>
+            <div class="col-auto">
+                <nav class="menu d-flex justify-content-center gap-3 mt-3">
+                    <th:block th:each="category : ${categories}">
+                        <a th:href="@{'/timeDelivery/catalogs/?category=' + ${category.name}}"
+                           class="menu-item"
+                           th:text="${category.name.toUpperCase()}"></a>
+                    </th:block>
+                </nav>
+            </div>
+            <div class="col-auto d-flex align-items-center">
+                <span class="me-2 text-secondary">📞 +7 (978) 999-99-99</span>
+                <a href="#" class="btn btn-cart btn-cart-color btn-sm cart-btn position-relative">
+                    <i class="bi bi-cart"></i>КОРЗИНА
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" style="display:none;">
+        0
+        <span class="visually-hidden">товаров в корзине</span>
+    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button id="scrollToTopBtn">
+    <img src="/photos/UP.png" alt="Scroll to top" />
+</button>
+
+<div class="d-flex justify-content-center mt-3">
+    <div class="input-group rounded-pill shadow-sm" style="width: 66.66%;">
+        <input id="searchInput" class="form-control border-end-0 rounded-pill search-input text" type="search" placeholder="🔍 Поиск" aria-label="Search">
+    </div>
+</div>
+
+<div class="container px-5">
+    <h1 class="text mt-3">Доставка в Севастополе</h1>
+    <p class="text">Прием заказов:</p>
+    <h3 class="text">ВСЯ ПРАВДА О ДОСТАВКЕ МИЯГИ</h3>
+    <p class="text">Ленинский район, Нахимовский район:</p>
+    <span class="tex">Вс. - Чт. с 10:00 до 02:00 (оформление последнего заказа до 01:45)</span><br>
+    <span class="text">Пт. - Сб. с 10:00 до 02:00 (оформление последнего заказа до 01:45)</span><br>
+    <span class="text">Гагаринский район, Казачья бухта:</span><br>
+    <span class="text">Вс. - Чт. с 10:00 до 02:00 (оформление последнего заказа до 01:45)</span><br>
+    <span class="text">Пт. - Сб. с 10:00 до 02:00 (оформление последнего заказа до 01:45)</span><br>
+    <p class="text">Бесплатная доставка суши, роллов, бургеров, wok, пиццы!</p>
+    <span class="text">Оформление заказов:</span><br>
+    <ul class="">
+        <li class="text">По Севастополю от 700₽</li>
+        <li class="text">В Фиолент от 2500₽</li>
+        <li class="text">В Инкерман, Сахарная головка, Штурмовое от 3000₽</li>
+        <li class="text">В Балаклаву от 3000 ₽</li>
+    </ul>
+    <p class="text">Минимальная сумма заказа зависит от адреса, точную информацию уточнит оператор.</p>
+
+    <span class="text ">Скидка на заказ 10% при самовывозе от 600р.</span><br>
+    <p class="text">*Скидка не суммируется с другими акционными предложениями и акционными сетами.</p>
+    <p class="text">!Теперь мы доставляем суши и пиццу в поселок Сахарная головка, село Штурмовое!</p>
+    <p class="text">!На Северную сторону доставка не осуществляется.</p>
+    <p class="text">Вам интересно узнать почему доставка Мияги пользуется такой популярностью? Тогда вы зашли по адресу!</p>
+    <div class="d-flex justify-content-center my-3">
+        <img class="img-info" src="/photos/info/deliveris1.webp" alt="pickup">
+    </div>
+
+<ul>
+    <li class="text">Мияги обладает не только высоким качеством продуктов и быстрой доставкой, но и предлагает широкий выбор блюд для самых разных вкусовых предпочтений. Меню включает в себя разнообразные виды пиццы, роллы, суши, салаты, супы и десерты. Вы можете выбирать из классических вариантов или попробовать что-то новое и оригинальное.</li>
+    <li class="text">Кроме того, Мияги уделяет особое внимание качеству ингредиентов. Наши роллы, пицца, салаты и соуса готовятся только из свежих и натуральных продуктов. Благодаря этому, каждое блюдо имеет насыщенный и неповторимый вкус.</li>
+</ul>
+
+<div class="d-flex justify-content-center my-3">
+    <img class="img-info" src="/photos/info/deliveris2.webp" alt="pickup">
+</div>
+
+<ul>
+    <li class="text">Доставка Мияги также предлагает различные акции и скидки, чтобы сделать ваш заказ еще более привлекательным. Вы можете воспользоваться сезонными скидками, акциями на комбо-предложения или получить бесплатную доставку при определенной сумме заказа.</li>
+    <li class="text">Команда профессиональных курьеров Мияги гарантирует, что ваш заказ будет доставлен вовремя и в горячем виде. Вы можете заказывать еду как для себя, так и для больших компаний или мероприятий.</li>
+</ul>
+
+<span class="text">Так что, если вы хотите насладиться вкусной и качественной пиццей или роллами, и при этом сэкономить время и усилия, доставка Мияги - отличный выбор!</span>
+
+<div class="d-flex justify-content-center my-3">
+    <img class="img-info" src="/photos/info/deliveris3.webp" alt="pickup">
+</div>
+</div>
+
+<script th:src="@{/js/cart.js}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/loginAndRegister.js}"></script>
+</body>
+
+<footer class="footer-bg">
+    <div class="container py-4">
+        <div class="row gy-4 justify-content-center">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="d-flex flex-column footer-boxes h-100">
+                    <h5>О МИЯГИ</h5>
+                    <span class="footer-text">Мы готовим кухню, которую ты захочешь попробовать снова.</span>
+                    <button type="button" class="btn btn-outline-warning btn-footer mt-3" onclick="window.location.href='/timeDelivery/restaurants'">Подробнее</button>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-2">
+                <div class="d-flex flex-column footer-boxes h-100">
+                    <h5>О КОМПАНИИ</h5>
+                    <a href="/timeDelivery/restaurants" class="footer-text">Контакты</a>
+                    <a href="/timeDelivery/bonuses" class="footer-text">Бонусы и скидки</a>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-2">
+                <div class="d-flex flex-column footer-boxes h-100">
+                    <h5>ДОСТАВКА И ОПЛАТА</h5>
+                    <a href="/timeDelivery/delivery" class="footer-text">Доставка</a>
+                    <a href="/timeDelivery/payment" class="footer-text">Оплата</a>
+                    <a href="/timeDelivery/pickup" class="footer-text">Самовывоз</a>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="d-flex flex-column footer-boxes h-100">
+                    <h5>КОНТАКТНАЯ ИНФОРМАЦИЯ</h5>
+                    <h5>+7 (978) 999-99-99</h5>
+                    <h5>+7 (978) 555-55-55</h5>
+                    <span class="footer-text">Время работы доставки: 10:00-02:00</span>
+                    <span class="footer-text">Бесплатная доставка суши и пиццы по Севастополю.</span>
+                    <span class="footer-text">г.Севастополь, ул. Олега Кошевого, 14А</span>
+                    <span class="footer-text">г.Севастополь, ул. Фадеева, 48</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</html>

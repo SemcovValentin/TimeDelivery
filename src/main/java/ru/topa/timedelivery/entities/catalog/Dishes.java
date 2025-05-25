@@ -1,5 +1,6 @@
 package ru.topa.timedelivery.entities.catalog;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +8,10 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.topa.timedelivery.entities.orders.OrderItem;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -24,7 +29,7 @@ public class Dishes {
     private String name;
 
     @Positive
-    @Column(nullable = false,columnDefinition = "MONEY")
+    @Column(nullable = false, columnDefinition = "DECIMAL(10,2)")
     private double price;
 
     @Positive
@@ -38,31 +43,32 @@ public class Dishes {
     @Column(name = "ingredients",columnDefinition = "TEXT",nullable = false)
     private String ingredient;
 
-    @Column(name = "vegetarian", nullable = false,columnDefinition = "BIT")
-    private boolean isVegan;
+    @OneToMany(mappedBy = "dish")
+    @JsonBackReference
+    private Set<OrderItem> orderItems;
 
-    @Column(name = "spicy", nullable = false,columnDefinition = "BIT")
-    private boolean isSpicy;
 
-    @Column(name = "is_top", nullable = false,columnDefinition = "BIT")
-    private boolean isTop;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "dish_categories",
+            joinColumns = @JoinColumn(name = "dish_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<TypeDishes> typeDishes = new HashSet<>();
 
-    @Column(name = "new", nullable = false,columnDefinition = "BIT")
-    private boolean isNew;
+    @ManyToMany
+    @JoinTable(
+            name = "dish_type",
+            joinColumns = @JoinColumn(name = "dish_id"),
+            inverseJoinColumns = @JoinColumn(name = "type_id"))
+    private Set<Type> types;
 
-    @Column(name = "type_deshes",nullable = false,columnDefinition = "VARCHAR(255)")
-    private TypeDishes typeDishes;
-
-    public Dishes(String name, double price, int weight, String imageUrl, String ingredient, boolean isVegan, boolean isSpicy, boolean isTop, boolean isNew, TypeDishes typeDishes) {
+    public Dishes(String name, double price, int weight, String imageUrl, String ingredient, Set<TypeDishes> typeDishes, Set<Type> types) {
         this.name = name;
         this.price = price;
         this.weight = weight;
         this.imageUrl = imageUrl;
         this.ingredient = ingredient;
-        this.isVegan = isVegan;
-        this.isSpicy = isSpicy;
-        this.isTop = isTop;
-        this.isNew = isNew;
         this.typeDishes = typeDishes;
+        this.types = types;
     }
 }

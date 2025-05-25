@@ -1,0 +1,356 @@
+.offcanvas {
+    background-color: #222;
+    color: #888;
+    border-left: 1px solid #444;
+}
+
+.auth-form {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #2a2a2a;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    color: #999;
+    border: 1px solid #444;
+}
+
+.auth-switcher .btn-group {
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.2);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.auth-switcher .btn {
+    border: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.auth-switcher .btn:not(.active) {
+    background: #333;
+    color: #f8f9fa;
+}
+
+.auth-switcher .btn.active {
+    background: #0d6efd;
+    color: #fff;
+}
+
+.form-control {
+    background: #333;
+    border: 1px solid #444;
+    color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    background: #444;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    color: #fff;
+}
+
+.form-control::placeholder {
+    color: #eee; /* почти белый */
+    opacity: 1;
+}
+
+.form-group label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #f8f9fa;
+}
+
+.toast {
+    border-radius: 0.75rem;
+}
+
+.toast-header {
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+@media (max-width: 576px) {
+    .auth-form {
+        padding: 1.5rem;
+    }
+}
+
+.toast {
+    border-radius: 0.75rem;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #eee;
+}
+
+.toast-header {
+    border-radius: 0.75rem 0.75rem 0 0;
+    background: #333;
+    color: #eee;
+    border-bottom: 1px solid #444;
+}
+
+.toast-body {
+    background: #2a2a2a;
+    color: #888;
+}
+
+
+body {
+    font-family: "Times New Roman", Times, serif;
+}
+
+/*левая колонка меню*/
+.custom-card {
+    background-color: #222;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 1rem;
+}
+
+.custom-card .card-title {
+    color: #ffd700;
+    font-size: 1.2rem;
+}
+
+.btn-footer {
+    border-radius: 0.5rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    font-size: 1.15rem;
+}
+
+.btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+    background-color: transparent;
+    transition: all 0.2s;
+}
+
+.btn-outline-warning:hover {
+    background-color: #ffc107;
+    color: #222;
+    border-color: #ffc107;
+}
+
+.btn-outline-danger {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+    background-color: transparent;
+    transition: all 0.2s;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+/* Правая колонка */
+.flex-grow-1 {
+    background-color: #222;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    color: #eee;
+    overflow-y: auto;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Заголовок */
+.flex-grow-1 h2 {
+    color: #ccc;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    user-select: none;
+}
+
+/* Таблица заказов */
+.flex-grow-1 table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.75rem;
+    background-color: #2f2f2f;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.flex-grow-1 .table {
+    background-color: #2f2f2f !important;
+    color: #eee !important;
+}
+
+/* Заголовки таблицы */
+.flex-grow-1 .table thead th {
+    background-color: #3a3a3a !important;
+    color: #eee !important;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    user-select: none;
+    text-shadow: none;
+}
+
+/* Чёрный текст в строках с товарами */
+.flex-grow-1 .table-striped > tbody > tr:nth-of-type(odd),
+.flex-grow-1 .table-striped > tbody > tr:nth-of-type(even),
+.flex-grow-1 .table tbody tr {
+    background-color: #444 !important;
+    color: #000 !important;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.flex-grow-1 .table tbody tr:hover {
+    background-color: #666 !important;
+    color: #000 !important;
+}
+
+/* Заголовок */
+.flex-grow-1 table.table thead th {
+    background-color: #3a3a3a !important;
+    color: #ccc !important;
+}
+
+/* Ячейки с чёрным текстом */
+.flex-grow-1 table.table tbody td {
+   /* padding: 0.75rem 1rem;*/
+    vertical-align: middle;
+    color: #000 !important;
+    border-top: 1px solid #444 !important;
+    transition: color 0.3s ease;
+}
+
+/* Цвет текста при ховере по строке */
+.flex-grow-1 .table tbody tr:hover td {
+    color: #000 !important;
+}
+
+/* Ссылки в ячейках */
+.flex-grow-1 table.table tbody td a {
+    color: black;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.flex-grow-1 table.table tbody td a:hover {
+    color: #ccc !important;
+}
+
+/* Нижняя строка с итогом */
+.flex-grow-1 tfoot td {
+    padding: 1rem;
+    font-weight: 700;
+    color: #eee;
+    border-top: 2px solid #555;
+    background-color: #3a3a3a;
+    text-shadow: none;
+}
+
+/* Сообщение об отсутствии заказов */
+#userOrdersEmptyMessage {
+    font-size: 1.2rem;
+    margin-top: 3rem;
+    color: #bbb;
+    user-select: none;
+}
+
+/* Скроллбар для правой колонки */
+.flex-grow-1::-webkit-scrollbar {
+    width: 8px;
+}
+
+.flex-grow-1::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+.flex-grow-1::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+}
+
+/* Скроллбар при ховере */
+.flex-grow-1::-webkit-scrollbar-thumb:hover {
+    background-color: #ccc;
+}
+
+.custom-card {
+    min-width: 270px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 0 0 200px;
+}
+
+/* Адаптивность для экранов <= 768px */
+@media (max-width: 768px) {
+    .container > .d-flex {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .custom-card {
+        width: 100% !important;
+        max-width: none;
+        margin-bottom: 1rem;
+    }
+
+    .flex-grow-1 {
+        max-height: none;
+        overflow-y: visible;
+        padding: 1rem;
+    }
+}
+
+
+.flex-grow-1 table {
+    font-size: 1.2rem;
+}
+
+.order-number {
+    font-size: 1.20rem;
+    font-weight: 600;
+}
+
+/*блюда*/
+#adminContent {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 15px;
+    box-sizing: border-box;
+}
+.card {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.btn-group-responsive {
+    gap: 10px; /* расстояние между кнопками */
+}
+
+@media (max-width: 991.98px) {
+    .btn-group-responsive {
+        flex-direction: column !important; /* кнопки друг под другом */
+        align-items: stretch; /* кнопки растягиваются на всю ширину */
+    }
+    .btn-group-responsive > button {
+        margin: 0 !important; /* убираем внешние отступы */
+        width: 100%; /* кнопки на всю ширину */
+    }
+}
+
+#ordersTable {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#ordersTable th, #ordersTable td {
+    width: 16.66%;
+    text-align: center;
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+
+
